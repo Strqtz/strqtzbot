@@ -10,11 +10,17 @@
   "license": "ISC",
   "dependencies": {
     "chalk": "^4.1.2",
-    "discord-akairo": "npm:@notenoughupdates/discord-akairo@^9.0.0",
-    "discord.js": "^13.1.0",
+    "discord-akairo": "npm:@notenoughupdates/discord-akairo@^9.0.1",
+    "discord.js": "npm:@notenoughupdates/discord.js@^13.2.0-dev",
+    "discordjs": "npm:@notenoughupdates/discord.js@^13.2.0-dev-909c8596cbb989b811ca50d07a9895e8c9246f7d",
     "dotenv": "^10.0.0",
+    "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "mongoose": "^6.0.8",
+    "node-fetch": "^3.0.0",
     "winston": "^3.3.3"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.175"
   }
 }
