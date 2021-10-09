@@ -3,3 +3,6 @@ node_modules/
 combined.log
 error.log
 .idea/
+.prettierignore
+.prettierrc.json
+.gitignore
