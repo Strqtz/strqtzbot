@@ -15,8 +15,8 @@ class Client extends AkairoClient {
         });
 
         /**
-         * 
-         * @param {Message | AkairoMessage} message  
+         *
+         * @param {Message | AkairoMessage} message
          */
 
         this.prefix = async (message) => {
@@ -24,6 +24,17 @@ class Client extends AkairoClient {
             const prefixGuildPrefix = prefixDb.get('guildPrefix');
             return prefixGuildPrefix;
         };
+
+        this.logging = winston.createLogger({
+            level: 'info',
+            format: winston.format.printf(log => `[${log.level.toUpperCase()}] - ${log.message}`),
+            colorize: true,
+            transports: [
+                new winston.transports.Console(),
+                new winston.transports.File({ filename: 'error.log', level: 'error' }),
+                new winston.transports.File({ filename: 'combined.log' }),
+            ]
+        });
 
         this.commandHandler = new CommandHandler( this, {
             directory: './src/commands',
@@ -39,16 +50,6 @@ class Client extends AkairoClient {
         });
     }
         async run () {
-            const logger = winston.createLogger({
-                level: 'info',
-                format: winston.format.printf(log => `[${log.level.toUpperCase()}] - ${log.message}`),
-                colorize: true,
-                transports: [
-                    new winston.transports.Console(),
-                    new winston.transports.File({ filename: 'error.log', level: 'error' }),
-                    new winston.transports.File({ filename: 'combined.log' }),
-                  ]
-            });
             this.commandHandler.loadAll();
             this.commandHandler.useListenerHandler(this.listenerHandler);
             this.listenerHandler.loadAll();
@@ -56,18 +57,14 @@ class Client extends AkairoClient {
                 useNewUrlParser: true,
                 useUnifiedTopology: true,
             }).then(() => {
-                logger.log('info', "Connected To MongoDB");
+                this.logging.log('info', "Connected To MongoDB");
             }).catch((e) => {
-                logger.log('error', e);
+                this.logging.log('error', e);
             });
 
-            
-            this.login(process.env.token).then(() => {
-                logger.log('info', "The Bot is Online");
-            }).catch((e) => {
-                logger.log('error', e)
-            });
-            
+
+            this.login(process.env.token);
+
     }
 }
 
