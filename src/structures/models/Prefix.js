@@ -1,6 +1,9 @@
-const { Schema, model } = require("mongoose");
+import mongoose from "mongoose";
+
+const { Schema } = mongoose;
+
 const Prefix = new Schema({
   guildID: { type: String, required: true, unique: true },
   guildPrefix: { type: String, required: true, default: "-" },
 });
-module.exports = model("prefix", Prefix);
+export default mongoose.model("prefix", Prefix);

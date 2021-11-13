@@ -1,39 +1,35 @@
-const {
+import {
   AkairoClient,
   CommandHandler,
+  InhibitorHandler,
   ListenerHandler,
-  AkairoMessage,
-} = require("discord-akairo");
-const { Intents, Message } = require("discord.js");
-const winston = require("winston");
-const mongoose = require("mongoose");
-const Prefix = require("../models/Prefix");
-require("dotenv").config();
+} from "discord-akairo";
+import { Intents, Message } from "discord.js";
+import winston from "winston";
+import mongoose from "mongoose";
+import Prefix from "../models/Prefix.js";
 
-class Client extends AkairoClient {
+import dotenv from "dotenv";
+
+dotenv.config();
+
+export default class Client extends AkairoClient {
   constructor() {
     super(
       {
-        ownerID: "686844201190555668",
+        ownerID: ["686844201190555668", "545129735970226177"],
       },
       {
         disableMentions: "everyone",
-        intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
+        intents: [
+          Intents.FLAGS.GUILDS,
+          Intents.FLAGS.GUILD_MESSAGES,
+          Intents.FLAGS.DIRECT_MESSAGES,
+        ],
       }
     );
 
-    /**
-     *
-     * @param {Message | AkairoMessage} message
-     */
-
-    this.prefix = async (message) => {
-      const prefixDb = await Prefix.findOne({ guildID: message.guildId });
-      const prefixGuildPrefix = prefixDb.get("guildPrefix");
-      return prefixGuildPrefix;
-    };
-
-    this.logging = winston.createLogger({
+    const customlog = winston.createLogger({
       level: "info",
       format: winston.format.printf(
         (log) => `[${log.level.toUpperCase()}] - ${log.message}`
@@ -46,23 +42,51 @@ class Client extends AkairoClient {
       ],
     });
 
+    /**
+     * @param {Message | AkairoMessage} message
+     */
+
+    this.prefix = async (message) => {
+      const prefixDb = await Prefix.findOne({ guildID: message.guildId });
+      const prefixGuildPrefix = prefixDb.get("guildPrefix");
+      return prefixGuildPrefix;
+    };
+
+    this.logging = customlog;
+
+    this.emoji = {
+      yesstatus: 906856708775747645,
+      nostatus: 906856917916319754,
+      maybestatus: 906857018227310603,
+    };
+
+    this.colour = Math.floor(Math.random() * 16777215).toString(16);
+
     this.commandHandler = new CommandHandler(this, {
       directory: "./src/commands",
       prefix: this.prefix,
       handleEdits: true,
       commandUtil: true,
       autoRegisterSlashCommands: true,
-      execSlash: true,
       allowMention: true,
+      blockBots: true,
+      defaultCooldown: 10000,
+      autoDefer: false,
+      typing: true,
+    });
+    this.inhibitorHandler = new InhibitorHandler(this, {
+      directory: "./src/inhibitors",
     });
     this.listenerHandler = new ListenerHandler(this, {
       directory: "./src/listeners",
     });
   }
-  async run() {
+  run() {
     this.commandHandler.loadAll();
     this.commandHandler.useListenerHandler(this.listenerHandler);
     this.listenerHandler.loadAll();
+    this.commandHandler.useInhibitorHandler(this.inhibitorHandler);
+    this.inhibitorHandler.loadAll();
     mongoose
       .connect(process.env.MONGODBURI, {
         useNewUrlParser: true,
@@ -78,5 +102,3 @@ class Client extends AkairoClient {
     this.login(process.env.token);
   }
 }
-
-module.exports = Client;

@@ -1,63 +1,101 @@
-const { Command, AkairoMessage } = require("discord-akairo");
-const { Message, MessageEmbed } = require("discordjs");
-const winston = require("winston");
+import { AkairoMessage, Command } from "discord-akairo";
+import { Message, MessageEmbed } from "discord.js";
 
-class HelpCommand extends Command {
+export default class HelpCommand extends Command {
   constructor() {
     super("help", {
-      aliases: ["help", "h"],
+      aliases: ["help"],
+      description: {
+        content: "A help command",
+        usage: "help [prefix]",
+        examples: ["-help ping"],
+      },
       category: "info",
-      description: [
-        {
-          content: "A help command",
-          usage: `help [command]`,
-          examples: [`-help prefix`],
-        },
-      ],
       args: [
         {
           id: "command",
-          type: "string",
+          type: "commandAlias",
+          match: "content",
         },
       ],
       slash: true,
       slashOptions: [
         {
-          name: "help",
-          description: "A help command",
+          name: "command",
           type: "STRING",
-          required: false,
+          description: "The command you need help with",
+          required: true,
         },
       ],
-      cooldown: 20000,
+      cooldown: 30000,
+      ratelimit: 5,
     });
   }
 
   /**
-   *@param {AkairoMessage | Message}  message
-   * @param {{command:string}} args
+   * @param {AkairoMessage | Message}  message
+   * @param {{command:Command | string}} args
    */
+
   async exec(message, args) {
-    const colour = Math.floor(Math.random() * 16777215).toString(16);
-    try {
-      if (!args.command) {
-        const antiCommand = new MessageEmbed()
-          .setColor(colour)
-          .setDescription(`No command`)
-          .setTimestamp()
-          .setFooter(
-            `Executed By ${message.member.displayName}`,
-            message.member.user.displayAvatarURL({
-              size: 64,
-              format: "png",
-              dynamic: true,
-            })
-          );
-        await message.util.reply({ embeds: [antiCommand] });
+    function capitalize(string) {
+      const str = string.toString();
+      return str[0].toUpperCase() + str.slice(1).toLowerCase();
+    }
+
+    function commaSpace(string) {
+      const str = string.toString();
+      return str.replace(",", ", ");
+    }
+
+    const command = args.command
+      ? typeof args.command === "string"
+        ? client.commandHandler.modules.get(args.command) ?? null
+        : args.command
+      : null;
+    if (command) {
+      const helpEmbed = new MessageEmbed()
+        .setColor(this.client.colour)
+        .setTitle(capitalize(command.aliases[0]))
+        .addFields(
+          {
+            name: `Category: `,
+            value: capitalize(command.category),
+          },
+          {
+            name: `Description: `,
+            value: `${command.description.content}`,
+          },
+          { name: `Usage: `, value: `${command.description.usage}` },
+          {
+            name: `Examples: `,
+            value: `${command.description.examples}`,
+          },
+          {
+            name: `Cooldown: `,
+            value: `${command.cooldown / 1000} seconds`,
+          }
+        )
+        .setTimestamp()
+        .setFooter(
+          `Executed By ${message.member.displayName}`,
+          message.member.user.displayAvatarURL({
+            size: 64,
+            format: "png",
+            dynamic: true,
+          })
+        );
+      const aliase = command.aliases;
+      if (command.aliases > [1]) {
+        helpEmbed.addField(`Aliases: `, commaSpace(aliase));
       }
-    } catch (e) {
-      winston.log("error", e);
+      if (command.slash === true) {
+        helpEmbed.addField(`Slash: `, `:green_circle:`);
+      }
+      if (command.slashOnly === true) {
+        helpEmbed.addField(`Slash-only: `, `:green_circle:`);
+      }
+      return await message.util.reply({ embeds: [helpEmbed] });
     }
   }
 }
-module.exports = HelpCommand;

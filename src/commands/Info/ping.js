@@ -1,29 +1,30 @@
-const { Command, AkairoMessage } = require("discord-akairo");
-const { MessageEmbed, Message } = require("discord.js");
+import { Command } from "discord-akairo";
 
-class PingCommand extends Command {
+import { Message, MessageEmbed } from "discord.js";
+
+export default class PingCommand extends Command {
   constructor() {
     super("ping", {
+      aliases: ["ping", "pong"],
       category: "info",
-      aliases: ["ping"],
       description: {
         content: "Shows the bot's ping",
         usage: "ping",
         examples: ["-ping"],
       },
-      slash: true,
-      cooldown: 10000,
+      channel: "guild",
+      cooldown: 20000,
+      ratelimit: 2,
     });
   }
 
   /**
-   * @param {AkairoMessage | Message}  message
+   * @param {Message}  message
    */
 
   async exec(message) {
-    const colour = Math.floor(Math.random() * 16777215).toString(16);
     const embed = new MessageEmbed()
-      .setColor(colour)
+      .setColor(this.client.colour)
       .setFields({ name: "🏓 Ping: ", value: `${this.client.ws.ping}ms` })
       .setTimestamp()
       .setFooter(
@@ -34,8 +35,6 @@ class PingCommand extends Command {
           dynamic: true,
         })
       );
-    message.util.reply({ embeds: [embed] });
+    message.util.reply({ embeds: [embed], ephemeral: true });
   }
 }
-
-module.exports = PingCommand;

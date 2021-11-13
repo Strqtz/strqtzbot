@@ -1,24 +1,26 @@
 {
   "name": "strqtzbot",
-  "version": "1.0.0",
+  "type": "module",
+  "version": "0.0.1",
   "description": "",
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ."
+    "start": "node src/index.js"
   },
   "author": "Strqtz",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.23.0",
+    "cachios": "^3.1.1",
     "chalk": "^4.1.2",
-    "discord-akairo": "npm:@notenoughupdates/discord-akairo@^9.0.1",
-    "discord.js": "npm:@notenoughupdates/discord.js@^13.2.0-dev",
-    "discordjs": "npm:@notenoughupdates/discord.js@^13.2.0-dev-909c8596cbb989b811ca50d07a9895e8c9246f7d",
+    "configstore": "^6.0.0",
+    "discord-akairo": "npm:@notenoughupdates/discord-akairo@^9.0.4",
+    "discord.js": "npm:@notenoughupdates/discord.js@^13.3.0",
     "dotenv": "^10.0.0",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "mongoose": "^6.0.8",
-    "node-fetch": "^3.0.0",
     "prettier": "^2.4.1",
     "winston": "^3.3.3"
   },

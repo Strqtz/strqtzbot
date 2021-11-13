@@ -1,3 +1,8 @@
-const Client = require("./structures/client/Client");
+import Client from "./structures/client/Client.js";
+
 const client = new Client();
-client.run();
+try {
+  client.run();
+} catch (e) {
+  this.client.logging.log("error", e);
+}
