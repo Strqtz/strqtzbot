@@ -1,5 +1,11 @@
 import { AkairoMessage, Command } from "discord-akairo";
-import { Message, MessageEmbed } from "discord.js";
+import {
+  Message,
+  MessageActionRow,
+  MessageEmbed,
+  MessageSelectMenu,
+} from "discord.js";
+import Prefix from "../../structures/models/Prefix.js";
 
 export default class HelpCommand extends Command {
   constructor() {
@@ -14,7 +20,7 @@ export default class HelpCommand extends Command {
       args: [
         {
           id: "command",
-          type: "commandAlias",
+          type: "command",
           match: "content",
         },
       ],
@@ -33,8 +39,8 @@ export default class HelpCommand extends Command {
   }
 
   /**
-   * @param {AkairoMessage | Message}  message
-   * @param {{command:Command | string}} args
+   * @param { Message | AkairoMessage}  message
+   * @param {{command: Command | string}} args
    */
 
   async exec(message, args) {
@@ -47,12 +53,35 @@ export default class HelpCommand extends Command {
       const str = string.toString();
       return str.replace(",", ", ");
     }
+    let prefixSet;
+    prefixSet = await Prefix.findOne({
+      guildID: message.guildId,
+    });
 
     const command = args.command
       ? typeof args.command === "string"
         ? client.commandHandler.modules.get(args.command) ?? null
         : args.command
       : null;
+    const isOwner = this.client.isOwner(message.author);
+    const isSuperUser = this.client.isSuperUser(message.author);
+    if (!command) {
+      const embed = new MessageEmbed()
+        .setColor(this.client.colour)
+        .setTimestamp()
+        .setDescription(
+          `For more information about a command use ${prefixSet.guildPrefix}help <command>`
+        );
+      for (const [, category] of this.handler.categories) {
+        const categoryFilter = category.filter((command) => {
+          if (command.ownerOnly && !isOwner) return false;
+          if (command.superUserOnly && !isSuperUser) {
+            return false;
+          }
+        });
+      }
+      return await message.util.reply({ embeds: [embed] });
+    }
     if (command) {
       const helpEmbed = new MessageEmbed()
         .setColor(this.client.colour)
@@ -66,7 +95,10 @@ export default class HelpCommand extends Command {
             name: `Description: `,
             value: `${command.description.content}`,
           },
-          { name: `Usage: `, value: `${command.description.usage}` },
+          {
+            name: `Usage: `,
+            value: `${prefixSet.guildPrefix}${command.description.usage}`,
+          },
           {
             name: `Examples: `,
             value: `${command.description.examples}`,

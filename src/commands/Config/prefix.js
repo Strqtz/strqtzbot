@@ -1,4 +1,4 @@
-import { Command } from "discord-akairo";
+import { AkairoMessage, Command } from "discord-akairo";
 import { Message, MessageEmbed } from "discord.js";
 import Prefix from "../../structures/models/Prefix.js";
 
@@ -18,6 +18,14 @@ export default class PrefixCommand extends Command {
           type: "string",
         },
       ],
+      slash: true,
+      slashOptions: [
+        {
+          name: "prefix",
+          type: "STRING",
+          description: "Your new prefix",
+        },
+      ],
       channel: "guild",
       cooldown: 30000,
       userPermissions: ["BAN_MEMBERS"],
@@ -25,7 +33,7 @@ export default class PrefixCommand extends Command {
   }
 
   /**
-   * @param {Message}  message
+   * @param { Message | AkairoMessage}  message
    * @param {{prefix:string}} args
    */
 

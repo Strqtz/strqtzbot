@@ -35,7 +35,7 @@ export default class VerifyCommand extends Command {
   }
 
   /**
-   * @param {AkairoMessage | Message}  message
+   * @param { Message | AkairoMessage}  message
    * @param {{mcname:string}} args
    */
 

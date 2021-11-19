@@ -71,8 +71,9 @@ export default class Client extends AkairoClient {
       allowMention: true,
       blockBots: true,
       defaultCooldown: 10000,
-      autoDefer: false,
-      typing: true,
+      autoDefer: true,
+      typing: false,
+      automateCategories: true,
     });
     this.inhibitorHandler = new InhibitorHandler(this, {
       directory: "./src/inhibitors",

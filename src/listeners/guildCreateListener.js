@@ -1,5 +1,5 @@
 import { Listener } from "discord-akairo";
-import { Guild } from "discord.js";
+import { Channel, Guild } from "discord.js";
 import Prefix from "../structures/models/Prefix.js";
 import fs from "fs";
 
@@ -16,6 +16,7 @@ export default class guildCreateListener extends Listener {
    */
 
   async exec(guild) {
+    let everyoneRole = guild.roles.cache.find((r) => r.name === "@everyone");
     let prefixSet;
     prefixSet = await Prefix.findOne({
       guildID: guild.id,
@@ -27,15 +28,22 @@ export default class guildCreateListener extends Listener {
       });
       response.save();
     }
-
-    fs.writeFile(
-      `../../configurations/` + guild.id + ".json",
-      "guild: " + guild.id,
-      function (err) {
-        if (err) {
-          return console.log(err);
-        }
-      }
-    );
+    if (
+      guild.channels.cache.find(
+        (c) => c.name === "Members: " + guild.memberCount
+      )
+    ) {
+      return false;
+    } else {
+      return guild.channels.create(`Members: ` + guild.memberCount, {
+        type: "GUILD_VOICE",
+        permissionOverwrites: [
+          {
+            id: everyoneRole.id,
+            deny: "CONNECT",
+          },
+        ],
+      });
+    }
   }
 }
