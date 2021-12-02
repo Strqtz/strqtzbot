@@ -3,6 +3,7 @@ import { AkairoMessage, Command } from "discord-akairo";
 import { Message, MessageEmbed } from "discord.js";
 
 import si from "systeminformation";
+import { mc } from "../../index.js";
 
 export default class InfoCommand extends Command {
   constructor() {
@@ -25,6 +26,10 @@ export default class InfoCommand extends Command {
    */
 
   async exec(message) {
+    const mem = await si.mem();
+    const os = await si.osInfo();
+    const cpu = await si.cpu();
+    const time = si.time().timezoneName;
     const embed = new MessageEmbed()
       .setColor(this.client.colour)
       .addFields({
@@ -41,34 +46,25 @@ export default class InfoCommand extends Command {
           dynamic: true,
         })
       );
-
-    const os = await si.osInfo();
-
-    const dataCpu = await si.cpu();
     embed.addFields(
+      {
+        name: "Uptime:",
+        value: `${Math.round(process.uptime())} seconds`,
+        inline: true,
+      },
       {
         name: "Platform:",
         value: `${os.platform}, ${os.kernel}`,
         inline: true,
       },
       {
-        name: "Uptime:",
-        value: `${Math.round(si.time().uptime)} seconds`,
+        name: "CPU Speed:",
+        value: `${cpu.speed} GHz`,
         inline: true,
       },
       {
-        name: "CPU Type:",
-        value: `${dataCpu.manufacturer}, ${dataCpu.brand}`,
-        inline: true,
-      },
-      {
-        name: "CPU Cores:",
-        value: `${dataCpu.cores}`,
-        inline: true,
-      },
-      {
-        name: "CPU Clock Speeds:",
-        value: `${dataCpu.speed} Min: ${dataCpu.speedMin} GHz, Max: ${dataCpu.speedMax} GHz`,
+        name: "Local Server Timezone:",
+        value: `${time}`,
         inline: true,
       }
     );

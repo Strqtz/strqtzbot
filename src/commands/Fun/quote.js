@@ -1,5 +1,10 @@
-import { AkairoMessage, Command } from "discord-akairo";
-import { Message, MessageEmbed } from "discord.js";
+import { AkairoMessage, Command, ContextMenuCommand } from "discord-akairo";
+import {
+  Message,
+  MessageActionRow,
+  MessageEmbed,
+  MessageSelectMenu,
+} from "discord.js";
 import cachios from "cachios";
 
 export default class QuoteCommand extends Command {
@@ -29,7 +34,7 @@ export default class QuoteCommand extends Command {
 
     const embed = new MessageEmbed()
       .setColor(this.client.colour)
-      .setDescription(`> ${quote.content}` + `\n` + `${quote.author}`);
+      .setDescription(`> ${quote.content}` + "\n" + `${quote.author}`);
     await message.util.reply({ embeds: [embed] });
   }
 }

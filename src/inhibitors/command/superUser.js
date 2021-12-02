@@ -1,5 +1,5 @@
-import { Command, Inhibitor } from "discord-akairo";
-import { Message } from "discord.js";
+import { AkairoMessage, Command, Inhibitor } from "discord-akairo";
+import { Message, MessageEmbed } from "discord.js";
 
 export default class SuperUser extends Inhibitor {
   constructor() {
@@ -12,13 +12,13 @@ export default class SuperUser extends Inhibitor {
   }
 
   /**
-   *@param {Message} message
+   *@param {Message | AkairoMessage} message
    * @param {Command} command
    */
 
   async exec(message, command) {
     if (command.superUserOnly) {
-      if (!client.isSuperUser(message.author)) {
+      if (!this.client.isSuperUser(message.author)) {
         return true;
       }
     }

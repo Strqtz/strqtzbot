@@ -37,7 +37,7 @@ export default class YoMamaCommand extends Command {
    */
 
   async exec(message, args) {
-    const yo = await cachios.get("https://yomomma-api.herokuapp.com/jokes", {
+    const yo = await cachios.get("https://api.yomomma.info/", {
       ttl: 1,
     });
     const yomama = yo.data;
@@ -46,10 +46,10 @@ export default class YoMamaCommand extends Command {
       .setColor(this.client.colour)
       .setDescription(yomama.joke);
     if (args.user) {
-      await message.util.send(args.user);
-      await message.util.reply({ embeds: [embed] });
-    } else {
-      await message.util.reply({ embeds: [embed] });
+      await message.util.send(
+        "<@" + args.user + ">" + " You have been sacrificed to the yomama gods"
+      );
     }
+    await message.util.reply({ embeds: [embed] });
   }
 }

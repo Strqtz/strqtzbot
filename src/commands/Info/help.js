@@ -20,17 +20,22 @@ export default class HelpCommand extends Command {
       args: [
         {
           id: "command",
-          type: "command",
+          type: "commandAlias",
           match: "content",
+          prompt: {
+            start: "What command do you need help with?",
+            retry: ":sad: Choose a valid command to find help for.",
+            optional: true,
+          },
         },
       ],
       slash: true,
       slashOptions: [
         {
-          name: "command",
           type: "STRING",
+          name: "command",
           description: "The command you need help with",
-          required: true,
+          required: false,
         },
       ],
       cooldown: 30000,
@@ -40,7 +45,7 @@ export default class HelpCommand extends Command {
 
   /**
    * @param { Message | AkairoMessage}  message
-   * @param {{command: Command | string}} args
+   * @param {{ command: Command | string }} args
    */
 
   async exec(message, args) {
@@ -60,12 +65,12 @@ export default class HelpCommand extends Command {
 
     const command = args.command
       ? typeof args.command === "string"
-        ? client.commandHandler.modules.get(args.command) ?? null
+        ? this.client.commandHandler.modules.get(args.command) ?? null
         : args.command
       : null;
     const isOwner = this.client.isOwner(message.author);
     const isSuperUser = this.client.isSuperUser(message.author);
-    if (!command) {
+    if (args.command == null || !command) {
       const embed = new MessageEmbed()
         .setColor(this.client.colour)
         .setTimestamp()
@@ -74,8 +79,8 @@ export default class HelpCommand extends Command {
         );
       for (const [, category] of this.handler.categories) {
         const categoryFilter = category.filter((command) => {
-          if (command.ownerOnly && !isOwner) return false;
-          if (command.superUserOnly && !isSuperUser) {
+          if (command.ownerOnly && !isOwner(message.author.id)) return false;
+          if (command.superUserOnly && !isSuperUser(message.author.id)) {
             return false;
           }
         });

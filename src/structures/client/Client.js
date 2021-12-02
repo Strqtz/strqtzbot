@@ -18,6 +18,7 @@ export default class Client extends AkairoClient {
     super(
       {
         ownerID: ["686844201190555668", "545129735970226177"],
+        superUserID: ["686844201190555668", "545129735970226177"],
       },
       {
         disableMentions: "everyone",
@@ -25,6 +26,7 @@ export default class Client extends AkairoClient {
           Intents.FLAGS.GUILDS,
           Intents.FLAGS.GUILD_MESSAGES,
           Intents.FLAGS.DIRECT_MESSAGES,
+          Intents.FLAGS.GUILD_MEMBERS,
         ],
       }
     );
@@ -71,7 +73,7 @@ export default class Client extends AkairoClient {
       allowMention: true,
       blockBots: true,
       defaultCooldown: 10000,
-      autoDefer: true,
+      autoDefer: false,
       typing: false,
       automateCategories: true,
     });

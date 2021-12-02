@@ -46,8 +46,8 @@ export default class AgifyCommand extends Command {
     const embed = new MessageEmbed()
       .setColor(this.client.colour)
       .addFields(
-        { name: "Name: ", value: `${agedata.name}` },
-        { name: "Age: ", value: `${agedata.age}` }
+        { name: "Name: ", value: `${agedata.name}`, inline: true },
+        { name: "Age: ", value: `${agedata.age}`, inline: true }
       );
     await message.util.reply({ embeds: [embed] });
   }
