@@ -61,7 +61,7 @@ export default class messageSendListener extends Listener {
             });
         }
       }
-      if (message.content.includes("ez ")) {
+      if (message.content.includes("ez")) {
         let ezMessages = [
           "Wait... This isn't what I typed!",
           "Anyone else really like Rick Astley?",
