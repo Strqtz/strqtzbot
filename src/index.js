@@ -28,7 +28,6 @@ function limbo() {
 try {
   client.run();
   init();
-  limbo();
 } catch (e) {
   console.log(e);
 }
