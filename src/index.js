@@ -62,7 +62,6 @@ mc.on("end", () => {
   setTimeout(() => {
     console.log("Connection failed. Retrying..");
     init();
-    limbo();
   }, 60000);
 });
 
@@ -73,7 +72,6 @@ mc.on("message", async (chatmsg) => {
   if (msg.endsWith(" joined the lobby!") && msg.includes("[MVP+")) {
     limbo();
     console.log("Sending to limbo.");
-    return;
   }
   if (!msg.includes("ArmorOfDivan")) {
     if (msg.startsWith("Guild > ")) {
