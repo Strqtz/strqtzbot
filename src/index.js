@@ -21,9 +21,14 @@ function init() {
   mc._client.once("session", (session) => (options.session = session));
 }
 
+function limbo() {
+  mc.chat("/achat §c");
+}
+
 try {
   client.run();
   init();
+  limbo();
 } catch (e) {
   console.log(e);
 }
@@ -54,10 +59,11 @@ mc.addChatPatternSet(
 //  }
 // );
 
-mc.once("kicked", () => {
+mc.on("end", () => {
   setTimeout(() => {
     console.log("Connection failed. Retrying..");
     init();
+    limbo();
   }, 60000);
 });
 
@@ -66,7 +72,7 @@ mc.on("message", async (chatmsg) => {
   let msg = chatmsg.toString();
   console.log("Minecraft: ".green + msg);
   if (msg.endsWith(" joined the lobby!") && msg.includes("[MVP+")) {
-    mc.chat("/limbo");
+    limbo();
     console.log("Sending to limbo.");
     return;
   }
@@ -116,7 +122,7 @@ mc.on("chat:PARTY_WARP", ([[username]]) => {
 });
 
 mc.on("chat:PARTY_INVITE", async ([[rank, username]]) => {
-  mc.chat("/limbo");
+  limbo();
   if (mc.username === username) {
     return;
   }
