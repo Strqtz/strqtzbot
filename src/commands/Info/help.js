@@ -70,21 +70,13 @@ export default class HelpCommand extends Command {
       : null;
     const isOwner = this.client.isOwner(message.author);
     const isSuperUser = this.client.isSuperUser(message.author);
-    if (args.command == null || !command) {
+    if (args.command == undefined || !command) {
       const embed = new MessageEmbed()
         .setColor(this.client.colour)
         .setTimestamp()
         .setDescription(
           `For more information about a command use ${prefixSet.guildPrefix}help <command>`
         );
-      for (const [, category] of this.handler.categories) {
-        const categoryFilter = category.filter((command) => {
-          if (command.ownerOnly && !isOwner(message.author.id)) return false;
-          if (command.superUserOnly && !isSuperUser(message.author.id)) {
-            return false;
-          }
-        });
-      }
       return await message.util.reply({ embeds: [embed] });
     }
     if (command) {
