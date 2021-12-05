@@ -4,6 +4,7 @@ For my Hypixel Guild StopThrowing, and my server Gamer Lounge.
 
 ## Features
 * Discord Chat to Guild Chat Bridge.
+* Frag Bot
 * Fun commands such as chucknorris jokes, and insults.
 
 ### Planned Features
