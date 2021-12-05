@@ -70,7 +70,7 @@ export default class HelpCommand extends Command {
       : null;
     const isOwner = this.client.isOwner(message.author);
     const isSuperUser = this.client.isSuperUser(message.author);
-    if (args.command == undefined || !command) {
+    if (!args.command || !command) {
       const embed = new MessageEmbed()
         .setColor(this.client.colour)
         .setTimestamp()
