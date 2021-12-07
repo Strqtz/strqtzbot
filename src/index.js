@@ -15,9 +15,13 @@ const options = {
 
 export let mc;
 
+function createBot() {
+  mineflayer.createBot(options};
+}
+
 function init() {
   console.log("Signing in!");
-  mc = mineflayer.createBot(options);
+  mc = createBot();
   mc._client.once("session", (session) => (options.session = session));
 }
 
@@ -61,7 +65,7 @@ mc.addChatPatternSet(
 mc.on("end", () => {
   setTimeout(() => {
     console.log("Connection failed. Retrying..");
-    init();
+    createBot();
   }, 60000);
 });
 
@@ -141,7 +145,7 @@ mc.on("chat:PARTY_INVITE", async ([[rank, username]]) => {
   if (data.guild != null) {
     if (data.guild.name === "StopThrowing") {
       mc.chat(`/p accept ${username}`);
-      mc.chat("/limbo");
+      limbo();
     }
   }
 });
