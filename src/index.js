@@ -17,7 +17,7 @@ export let mc;
 
 function init() {
   console.log("Signing in!");
-  mc =  mineflayer.createBot(options};;
+  mc =  mineflayer.createBot(options);
   mc._client.once("session", (session) => (options.session = session));
 }
 
