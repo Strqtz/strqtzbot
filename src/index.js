@@ -15,13 +15,9 @@ const options = {
 
 export let mc;
 
-function createBot() {
-  mineflayer.createBot(options};
-}
-
 function init() {
   console.log("Signing in!");
-  mc = createBot();
+  mc =  mineflayer.createBot(options};;
   mc._client.once("session", (session) => (options.session = session));
 }
 
@@ -65,7 +61,7 @@ mc.addChatPatternSet(
 mc.on("end", () => {
   setTimeout(() => {
     console.log("Connection failed. Retrying..");
-    createBot();
+    init();
   }, 60000);
 });
 
