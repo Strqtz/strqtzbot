@@ -3,7 +3,6 @@ import { AkairoMessage, Command } from "discord-akairo";
 import { Message, MessageEmbed } from "discord.js";
 
 import si from "systeminformation";
-import { mc } from "../../index.js";
 
 export default class InfoCommand extends Command {
   constructor() {

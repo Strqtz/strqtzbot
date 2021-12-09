@@ -3,6 +3,7 @@ import mineflayer from "mineflayer";
 import * as colors from "colors";
 import { MessageEmbed } from "discord.js";
 import cachios from "cachios";
+import wait from "wait";
 
 const client = new Client();
 const options = {
@@ -17,7 +18,7 @@ export let mc;
 
 function init() {
   console.log("Signing in!");
-  mc =  mineflayer.createBot(options);
+  mc = mineflayer.createBot(options);
   mc._client.once("session", (session) => (options.session = session));
 }
 
@@ -142,6 +143,9 @@ mc.on("chat:PARTY_INVITE", async ([[rank, username]]) => {
     if (data.guild.name === "StopThrowing") {
       mc.chat(`/p accept ${username}`);
       limbo();
+      wait(5000).then(() => {
+        mc.chat(`/p leave`);
+      });
     }
   }
 });
