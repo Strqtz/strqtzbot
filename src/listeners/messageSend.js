@@ -3,6 +3,7 @@ import { Channel, Message, WebhookClient } from "discord.js";
 import MessageExp from "../structures/models/MessageExp.js";
 import Prefix from "../structures/models/Prefix.js";
 import { mc } from "../index.js";
+import wait from "wait";
 
 export default class messageSendListener extends Listener {
   constructor() {
@@ -22,7 +23,7 @@ export default class messageSendListener extends Listener {
     userExist = await MessageExp.findOne({
       discordID: message.author.id,
     });
-    if (!message.author.bot) {
+    if (!message.author.bot && !command) {
       if (!userExist) {
         let expCreate = await MessageExp.create({
           discordID: message.author.id,
@@ -52,12 +53,17 @@ export default class messageSendListener extends Listener {
               },
             }
           );
+          wait(1000);
           message.util
             .reply(
-              `<@${userExist.discordID}> you levelled up to ${userExist.level}`
+              `<@${userExist.discordID}> you levelled up to ${
+                userExist.level + 1
+              }`
             )
             .then(() => {
               console.log("");
+              wait(3000);
+              message.util.delete();
             });
         }
       }

@@ -1,3 +1,4 @@
+import("newrelic");
 import Client from "./structures/client/Client.js";
 import mineflayer from "mineflayer";
 import * as colors from "colors";
