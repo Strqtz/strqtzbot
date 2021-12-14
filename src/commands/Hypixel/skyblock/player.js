@@ -104,7 +104,8 @@ export default class PlayerCommand extends Command {
       `https://api.hypixel.net/skyblock/profiles?key=${process.env.apiKey}&uuid=${uuiddata.id}`,
       { ttl: 60 }
     );
-    let friendsreq = await cachios.get(
+
+    const friendsreq = await cachios.get(
       `https://api.hypixel.net/friends?key=` +
         process.env.apiKey +
         "&uuid=" +
@@ -114,7 +115,7 @@ export default class PlayerCommand extends Command {
 
     const friendsdata = friendsreq.data;
 
-    let playerreq = await cachios.get(
+    const playerreq = await cachios.get(
       `https://api.hypixel.net/player?key=` +
         process.env.apiKey +
         "&uuid=" +
@@ -187,7 +188,10 @@ export default class PlayerCommand extends Command {
           2
         )}`
       );
-      embed.addField(`Networth:`, Humanize.formatNumber(res.networth, 2));
+      embed.addField(
+        `Networth:`,
+        "$" + Humanize.formatNumber(res.networth + res.purse + res.bank, 2)
+      );
     }
     await message.util.reply({ embeds: [embed] });
   }
