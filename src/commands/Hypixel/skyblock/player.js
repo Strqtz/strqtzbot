@@ -259,7 +259,7 @@ export default class PlayerCommand extends Command {
           `Networth:`,
           "$" + Humanize.formatNumber(res.networth + res.purse + res.bank, 2)
         );
-        await message.util.edit({ embeds: [embed], components: [components] });
+        await message.util.send({ embeds: [embed], components: [components] });
       } else if (page === 2) {
         await lilyweight.getWeight(uuiddata.id).then((weight) => {
           embed
