@@ -46,7 +46,6 @@ export default class PlayerCommand extends Command {
    */
 
   async exec(message, args) {
-    message.util.reply({content: "Player Viewer"})
     let page = 1;
     let pages = 3;
 
