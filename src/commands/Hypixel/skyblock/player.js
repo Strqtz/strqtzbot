@@ -46,6 +46,7 @@ export default class PlayerCommand extends Command {
    */
 
   async exec(message, args) {
+    message.util.reply({content: "Player Viewer"})
     let page = 1;
     let pages = 3;
 
@@ -258,7 +259,7 @@ export default class PlayerCommand extends Command {
           `Networth:`,
           "$" + Humanize.formatNumber(res.networth + res.purse + res.bank, 2)
         );
-        await message.util.reply({ embeds: [embed], components: [components] });
+        await message.util.edit({ embeds: [embed], components: [components] });
       } else if (page === 2) {
         await lilyweight.getWeight(uuiddata.id).then((weight) => {
           embed
