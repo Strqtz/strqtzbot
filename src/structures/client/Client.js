@@ -73,7 +73,7 @@ export default class Client extends AkairoClient {
       allowMention: true,
       blockBots: true,
       defaultCooldown: 10000,
-      autoDefer: false,
+      autoDefer: true,
       typing: false,
       automateCategories: true,
     });
