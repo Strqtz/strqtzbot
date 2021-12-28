@@ -9,7 +9,7 @@ import {
 import LilyWeight from "lilyweight";
 import Humanize from "humanize-plus";
 import cachios from "cachios";
-import { pagination, paginationEmbed } from "discordjs-button-pagination";
+import { pagination, paginationEmbed } from "../../../libs/pagination.js";
 import {
   getLevelFromXP,
   removeUnderscorePlus,
