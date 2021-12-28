@@ -88,7 +88,7 @@ export default class PrefixCommand extends Command {
               dynamic: true,
             })
           );
-        message.util.reply({ embeds: [setPrefixAlready] });
+        await message.util.reply({ embeds: [setPrefixAlready] });
       }
     } catch (e) {
       message.util.reply(`There was an error executing this command.`, {

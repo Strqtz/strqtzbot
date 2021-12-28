@@ -61,20 +61,20 @@ export default class VerifyCommand extends Command {
       res.data.player.socialMedia.links.DISCORD === message.author.tag;
     try {
       HypixelSet = await LinkHypixel.findOne({
-        discordID: message.author.tag,
-        username: args.mcname,
+        discordID: message.author.id,
+        uuid: uuidjson.id,
       });
       if (correct) {
         if (!HypixelSet) {
           let response = await LinkHypixel.create({
-            discordID: message.author.tag,
-            username: args.mcname,
+            discordID: message.author.id,
+            uuid: uuidjson.id,
           });
           response.save().then(() => {
             const name = new MessageEmbed()
               .setColor(this.client.colour)
               .setDescription(
-                `Updated the connected account for ${message.author.username} to ${args.mcname}`
+                `Updated the connected account for ${message.author.username} to ${uuidjson.name}`
               )
               .setTimestamp()
               .setFooter(
@@ -86,31 +86,6 @@ export default class VerifyCommand extends Command {
                 })
               );
             message.util.reply({ embeds: [name], ephemeral: true });
-          });
-        } else {
-          const veriUpdate = LinkHypixel.findOneAndUpdate(
-            {
-              discordID: message.author.tag,
-            },
-            {
-              username: args.mcname,
-            }
-          ).then(() => {
-            const setName = new MessageEmbed()
-              .setColor(this.client.colour)
-              .setDescription(
-                `Updated the connected account for ${message.author.username} to ${args.mcname}`
-              )
-              .setTimestamp()
-              .setFooter(
-                `Executed By ${message.member.displayName}`,
-                message.member.user.displayAvatarURL({
-                  size: 64,
-                  format: "png",
-                  dynamic: true,
-                })
-              );
-            message.util.reply({ embeds: [setName], ephemeral: true });
           });
         }
       } else {
@@ -129,13 +104,6 @@ export default class VerifyCommand extends Command {
             })
           );
         await message.util.reply({ embeds: [notEqual], ephemeral: true });
-      }
-      if (args.mcname === null) {
-        await message.util.reply(
-          `${LinkHypixel.findOne({ discordID: message.author.tag }).get(
-            username
-          )}`
-        );
       }
     } catch (e) {
       message.util.reply(

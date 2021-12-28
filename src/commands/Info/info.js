@@ -2,6 +2,7 @@ import { AkairoMessage, Command } from "discord-akairo";
 
 import { Message, MessageEmbed } from "discord.js";
 
+import humanize from "humanize-duration";
 import si from "systeminformation";
 
 export default class InfoCommand extends Command {
@@ -48,7 +49,9 @@ export default class InfoCommand extends Command {
     embed.addFields(
       {
         name: "Uptime:",
-        value: `${Math.round(process.uptime())} seconds`,
+        value: `${humanize(Math.floor(process.uptime() * 1000), {
+          round: true,
+        })}`,
         inline: true,
       },
       {

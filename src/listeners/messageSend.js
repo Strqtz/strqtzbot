@@ -2,7 +2,7 @@ import { AkairoMessage, Command, Listener } from "discord-akairo";
 import { Channel, Message, WebhookClient } from "discord.js";
 import MessageExp from "../structures/models/MessageExp.js";
 import Prefix from "../structures/models/Prefix.js";
-import { mc } from "../index.js";
+// import { mc } from "../index.js";
 import wait from "wait";
 
 export default class messageSendListener extends Listener {
@@ -53,17 +53,16 @@ export default class messageSendListener extends Listener {
               },
             }
           );
-          wait(1000);
-          message.util
-            .reply(
+          await wait(1000);
+          message.author
+            .send(
               `<@${userExist.discordID}> you levelled up to ${
                 userExist.level + 1
               }`
             )
-            .then(() => {
+            .then(async () => {
               console.log("");
-              wait(3000);
-              message.util.delete();
+              await wait(5000);
             });
         }
       }
