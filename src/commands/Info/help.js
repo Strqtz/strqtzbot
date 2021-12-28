@@ -114,10 +114,8 @@ export default class HelpCommand extends Command {
             dynamic: true,
           })
         );
-      const aliase = command.aliases;
-      if (command.aliases > [1]) {
-        helpEmbed.addField(`Aliases: `, commaSpace(aliase));
-      }
+      const aliase = command.aliases.toString();
+      helpEmbed.addField(`Aliases: `, aliase);
       if (command.slash === true) {
         helpEmbed.addField(`Slash: `, `:green_circle:`);
       }
