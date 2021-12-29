@@ -342,16 +342,8 @@ export default class PlayerCommand extends Command {
           )
           .setDescription(`**Skill Average:** ${sa}`);
 
-        if (message.interaction) {
-          await paginationEmbed(
-            msg.interaction,
-            this.embeds,
-            this.buttons,
-            30000
-          );
-        } else {
+        
           await pagination(msg, this.embeds, this.buttons, 30000);
-        }
       }
     } catch (e) {
       console.error(e);
