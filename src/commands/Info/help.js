@@ -1,5 +1,6 @@
 import { AkairoMessage, Command } from "discord-akairo";
 import {
+  Interaction,
   Message,
   MessageActionRow,
   MessageEmbed,
@@ -53,11 +54,6 @@ export default class HelpCommand extends Command {
       const str = string.toString();
       return str[0].toUpperCase() + str.slice(1).toLowerCase();
     }
-
-    function commaSpace(string) {
-      const str = string.toString();
-      return str.replace(",", ", ");
-    }
     let prefixSet;
     prefixSet = await Prefix.findOne({
       guildID: message.guildId,
@@ -70,13 +66,34 @@ export default class HelpCommand extends Command {
       : null;
     const isOwner = this.client.isOwner(message.author);
     const isSuperUser = this.client.isSuperUser(message.author);
-    if (!args.command || !command) {
+    if (!command) {
       const embed = new MessageEmbed()
         .setColor(this.client.colour)
-        .setTimestamp()
-        .setDescription(
+        .setTimestamp();
+      if (message.interaction) {
+        embed.setFooter(
+          `For more information about a command use /help <command>`
+        );
+      } else {
+        embed.setFooter(
           `For more information about a command use ${prefixSet.guildPrefix}help <command>`
         );
+      }
+
+      for (const [, category] of this.client.commandHandler.categories) {
+        const catFilter = category.filter((command) => {
+          if (command.ownerOnly && !isOwner) return false;
+          if (command.superUserOnly && !isSuperUser) return false;
+          return command;
+        });
+        const categoryNice = category.id
+          .replace(/(\b\w)/gi, (lc) => lc.toUpperCase())
+          .replace(/'(S)/g, (letter) => letter.toLowerCase());
+        const categoryCommands = catFilter
+          .filter((cmd) => cmd.aliases.length > 0)
+          .map((cmd) => `\`${cmd.aliases[0]}\``);
+        embed.addField(`${categoryNice}`, `${categoryCommands.join(", ")}`);
+      }
       return await message.util.reply({ embeds: [embed] });
     }
     if (command) {
