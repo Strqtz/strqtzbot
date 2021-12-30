@@ -63,7 +63,8 @@ export default class PetpetCommand extends Command {
     } else if (args.image) {
       if (args.image.includes("<@")) {
         gif = await petpetGif(
-        getUserFromMention(args.ign).avatarURL({ size: 512, format: "png", dynamic: true }));
+        getUserFromMention(args.ign).avatarURL()
+        );
       } else {
       gif = await petpetGif(args.image);
       }
