@@ -42,14 +42,31 @@ export default class PetpetCommand extends Command {
    */
 
   async exec(message, args) {
+     function getUserFromMention(mention) {
+	if (!mention) return;
+
+	if (mention.startsWith('<@') && mention.endsWith('>')) {
+		mention = mention.slice(2, -1);
+
+		if (mention.startsWith('!')) {
+			mention = mention.slice(1);
+		}
+
+		return this.client.users.cache.get(mention);
+	}
+    }
     let gif;
     if (!args.image) {
       gif = await petpetGif(
         message.author.avatarURL({ size: 512, format: "png", dynamic: true })
       );
     } else if (args.image) {
-      if (args.image.includes("<@")) return false;
+      if (args.image.includes("<@")) {
+        gif = await petpetGif(
+        getUserFromMention(args.ign).avatarURL({ size: 512, format: "png", dynamic: true }));
+      } else {
       gif = await petpetGif(args.image);
+      }
     }
     fs.writeFile("petpet.gif", gif, function (err) {
       console.log(err);
