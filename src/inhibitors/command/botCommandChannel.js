@@ -21,7 +21,7 @@ export default class BotCommandChannelInhibitor extends Inhibitor {
       "902852076864929793",
       "909713781205135380",
     ];
-    if (!message.channel.id === botchannels) {
+    if (message.channel.id !== botchannels) {
       return true;
     } else {
       return false;
