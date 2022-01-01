@@ -18,11 +18,10 @@ export default class BotCommandChannelInhibitor extends Inhibitor {
 
   async exec(message, command) {
     let botchannels = [
-      "833607988798816279",
       "902852076864929793",
       "909713781205135380",
     ];
-    if (!message.channel.id === botchannels) {
+    if (botchannels.includes(message.channel.id)) {
       return true;
     } else {
       return false;
