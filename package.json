@@ -35,7 +35,7 @@
     "humanize-plus": "^1.8.2",
     "hyflayer": "^3.1.1",
     "inquirer": "^8.2.0",
-    "lilyweight": "^2.0.0",
+    "lilyweight": "^2.1.0",
     "lodash": "^4.17.21",
     "mineflayer": "^3.11.2",
     "moment": "^2.29.1",
