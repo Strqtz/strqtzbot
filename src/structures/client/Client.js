@@ -112,7 +112,7 @@ export default class Client extends AkairoClient {
 
     const msg = await channel.send("Status SUS");
 
-    const job = await schedule.scheduleJob("5 * * * * *", async function () {
+    const job = await schedule.scheduleJob("55 * * * * *", async function () {
       const req = await cachios.get(
         `https://api.hypixel.net/status?key=${process.env.apiKey}&uuid=b430f6a32ce6461398d2644e56044546`,
         { ttl: 59 }
