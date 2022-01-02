@@ -119,7 +119,7 @@ export default class Client extends AkairoClient {
       );
       const embed = new MessageEmbed()
         .setTitle("Fragbot Status")
-        .setDescription("**Online:** " + online[req.data.session.online]);
+        .setDescription("**Online:** " + online[req.data.session.online]).setTimestamp();
       await msg.edit({ embeds: [embed], content: "Fragbot Status" });
       console.log("Edited Message");
     });
