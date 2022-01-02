@@ -23,7 +23,7 @@ export default class readyListener extends Listener {
     const online = {
              "true": "<:yes:927007251695276043>",
              "false": "<:no:927007278870171708>"
-    }
+    };
     const channel = this.client.guild.channels.cache.get("927000023345021038");
     if(channel) {
       const job = await schedule.scheduleJob("60 * * * * *", function() {
@@ -32,7 +32,7 @@ export default class readyListener extends Listener {
         const msg = channel.send({embeds: [embed]});
         wait(58000);
         msg.delete();
-      })
+      });
     }
   }
 }
