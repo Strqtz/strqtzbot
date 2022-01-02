@@ -4,12 +4,16 @@ import {
   InhibitorHandler,
   ListenerHandler,
 } from "discord-akairo";
-import { Intents, Message } from "discord.js";
+import { Intents, Message, MessageEmbed } from "discord.js";
 import winston from "winston";
 import mongoose from "mongoose";
 import Prefix from "../models/Prefix.js";
 
 import dotenv from "dotenv";
+import schedule from "node-schedule";
+import cachios from "cachios";
+import { online } from "../Constants/constants.js";
+import wait from "wait";
 
 dotenv.config();
 
@@ -84,12 +88,12 @@ export default class Client extends AkairoClient {
       directory: "./src/listeners",
     });
   }
-  run() {
-    this.commandHandler.loadAll();
+  async run() {
+    await this.commandHandler.loadAll();
     this.commandHandler.useListenerHandler(this.listenerHandler);
-    this.listenerHandler.loadAll();
+    await this.listenerHandler.loadAll();
     this.commandHandler.useInhibitorHandler(this.inhibitorHandler);
-    this.inhibitorHandler.loadAll();
+    await this.inhibitorHandler.loadAll();
     mongoose
       .connect(process.env.MONGODBURI, {
         useNewUrlParser: true,
@@ -102,6 +106,21 @@ export default class Client extends AkairoClient {
         this.logging.log("error", e);
       });
 
-    this.login(process.env.token);
+    await this.login(process.env.token);
+    await wait(1000);
+    const channel = this.channels.cache.get(process.env.FRAGBOT_CHANNEL);
+
+    const msg = await channel.send("Status SUS");
+
+    const job = await schedule.scheduleJob("5 * * * * *", async function () {
+      const req = await cachios.get(
+        `https://api.hypixel.net/status?key=${process.env.apiKey}&uuid=b430f6a32ce6461398d2644e56044546`,
+        { ttl: 59 }
+      );
+      const embed = new MessageEmbed()
+        .setTitle("Fragbot Status")
+        .setDescription("**Online:** " + online[req.data.session.online]);
+      await msg.edit({ embeds: [embed], content: "Fragbot Status" });
+    });
   }
 }

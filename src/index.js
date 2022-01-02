@@ -1,9 +1,11 @@
 import Client from "./structures/client/Client.js";
+const { channel } = Client;
 import mineflayer from "mineflayer";
 import * as colors from "colors";
 import { MessageEmbed } from "discord.js";
 import cachios from "cachios";
 import wait from "wait";
+import schedule from "node-schedule";
 
 const client = new Client();
 const options = {

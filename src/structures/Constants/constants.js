@@ -84,3 +84,8 @@ export function getTotalScore(exploration, speed, skill, bonus) {
   }
   return [total, grade];
 }
+
+export const online = {
+  true: ":green_circle:",
+  false: ":red_circle:",
+};
