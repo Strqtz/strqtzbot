@@ -86,6 +86,6 @@ export function getTotalScore(exploration, speed, skill, bonus) {
 }
 
 export const online = {
-  true: ":green_circle:",
-  false: ":red_circle:",
+  true: "Online",
+  false: "Offline",
 };
