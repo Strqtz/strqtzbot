@@ -31,7 +31,7 @@ export default class readyListener extends Listener {
       const job = await schedule.scheduleJob("60 * * * * *", function() {
         const req = await cachios.get(`https://api.hypixel.net/status?key=${process.env.apiKey}&uuid=b430f6a32ce6461398d2644e56044546`, {ttl: 59});
         const embed = new MessageEmbed().setTitle("Fragbot Status").setDescription("**Online:** " + online.onlineStatus[req.data.session.online]);
-        const msg = channel.send({embed: [embed]});
+        const msg = channel.send({embeds: [embed]});
         wait(58000);
         msg.delete();
       })
