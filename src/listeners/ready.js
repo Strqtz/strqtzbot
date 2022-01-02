@@ -21,14 +21,16 @@ export default class readyListener extends Listener {
       status: "idle",
     });
     const online = {
-      "true": "<:yes:927007251695276043>",
-      "false": "<:no:927007278870171708>"
+         "onlineStatus": {
+             "true": "<:yes:927007251695276043>",
+             "false": "<:no:927007278870171708>"
+        },
     }
     const channel = this.client.guild.channels.cache.get("927000023345021038");
     if(channel) {
       const job = await schedule.scheduleJob("60 * * * * *", function() {
         const req = await cachios.get(`https://api.hypixel.net/status?key=${process.env.apiKey}&uuid=b430f6a32ce6461398d2644e56044546`, {ttl: 59});
-        const embed = new MessageEmbed().setTitle("Fragbot Status").setDescription("**Online:** " + online[req.data.session.online]);
+        const embed = new MessageEmbed().setTitle("Fragbot Status").setDescription("**Online:** " + online.onlineStatus[req.data.session.online]);
         const msg = channel.send({embed: [embed]});
         wait(58000);
         msg.delete();
