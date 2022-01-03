@@ -47,6 +47,7 @@ export default class VerifyCommand extends Command {
         ttl: 10,
       }
     );
+    const msg = message.util.reply("Linking...");
     const uuidjson = uuid.data;
     const res = await cachios.get(
       `https://api.hypixel.net/player?uuid=` +
@@ -62,7 +63,6 @@ export default class VerifyCommand extends Command {
     try {
       HypixelSet = await LinkHypixel.findOne({
         discordID: message.author.id,
-        uuid: uuidjson.id,
       });
       if (correct) {
         if (!HypixelSet) {
@@ -70,7 +70,7 @@ export default class VerifyCommand extends Command {
             discordID: message.author.id,
             uuid: uuidjson.id,
           });
-          response.save().then(() => {
+          response.save().then(async () => {
             const name = new MessageEmbed()
               .setColor(this.client.colour)
               .setDescription(
@@ -85,7 +85,15 @@ export default class VerifyCommand extends Command {
                   dynamic: true,
                 })
               );
-            message.util.reply({ embeds: [name], ephemeral: true });
+            return await message.util.reply({
+              embeds: [name],
+              ephemeral: true,
+            });
+          });
+        } else if (HypixelSet) {
+          return await message.util.reply({
+            content: "You're already linked lol.",
+            ephemeral: true,
           });
         }
       } else {
@@ -103,14 +111,17 @@ export default class VerifyCommand extends Command {
               dynamic: true,
             })
           );
-        await message.util.reply({ embeds: [notEqual], ephemeral: true });
+        return await message.util.reply({
+          embeds: [notEqual],
+          ephemeral: true,
+        });
       }
     } catch (e) {
-      message.util.reply(
+      this.client.logging.log("error", e);
+      return message.util.reply(
         { ephemeral: true },
         `An error occured while executing this command`
       );
-      this.client.logging.log("error", e);
     }
   }
 }
