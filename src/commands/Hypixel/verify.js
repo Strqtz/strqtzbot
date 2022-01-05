@@ -41,6 +41,25 @@ export default class VerifyCommand extends Command {
 
   async exec(message, args) {
     let HypixelSet;
+HypixelSet = await LinkHypixel.findOne({
+        discordID: message.author.id,
+      });
+      if(!args.mcname) {
+        if(HypixelSet){
+          let uuidreq = await cachios.get(
+          `https://sessionserver.mojang.com/session/minecraft/profile/${HypixelSet.get(
+            "uuid"
+          )}`,
+          { ttl: 120 }
+        );
+           const embed = new MessageEmbed().setDescription("Your linked Minecraft account is " + uuidreq.data.name).setThumbnail(
+            `https://crafatar.com/avatars/${uuidreq.data.id}?size=32&overlay&default=717eb72c52024fbaa91a3e61f34b3b58`
+          );
+           return await message.util.reply({embeds: [embed]});
+        }else if(!HypixelSet) {
+          return await message.util.reply("Please link your account using \`/verify <ign>\`.");
+        }
+      }
     const uuid = await cachios.get(
       "https://api.mojang.com/users/profiles/minecraft/" + args.mcname,
       {
@@ -60,25 +79,6 @@ export default class VerifyCommand extends Command {
     const correct =
       res.data.player.socialMedia.links.DISCORD === message.author.tag;
     try {
-      HypixelSet = await LinkHypixel.findOne({
-        discordID: message.author.id,
-      });
-      if(!args.mcname) {
-        if(HypixelSet){
-          let uuidreq = await cachios.get(
-          `https://sessionserver.mojang.com/session/minecraft/profile/${HypixelSet.get(
-            "uuid"
-          )}`,
-          { ttl: 120 }
-        );
-           const embed = new MessageEmbed().setDescription("Your linked Minecraft account is " + uuidreq.data.name).setThumbnail(
-            `https://crafatar.com/avatars/${uuidreq.data.id}?size=32&overlay&default=717eb72c52024fbaa91a3e61f34b3b58`
-          );
-           return await message.util.reply({embeds: [embed]});
-        }else if(!HypixelSet) {
-          return await message.util.reply("Please link your account using \`/verify <ign>\`.");
-        }
-      }
     const msg = message.util.reply("Linking your account <a:loading:928083841514614795>");
       if (correct) {
         if (!HypixelSet) {
