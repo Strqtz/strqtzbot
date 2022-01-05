@@ -47,7 +47,7 @@ export default class VerifyCommand extends Command {
         ttl: 10,
       }
     );
-    const msg = message.util.reply("Linking...");
+    const msg = message.util.reply("Linking your account <a:loading:928083841514614795>");
     const uuidjson = uuid.data;
     const res = await cachios.get(
       `https://api.hypixel.net/player?uuid=` +
