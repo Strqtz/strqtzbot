@@ -53,13 +53,13 @@ mc.addChatPatternSet(
   }
 );
 
-// mc.addChatPatternSet(
-//  "GET_G_ONLINE",
-// [/^(.+) warped the party to a SkyBlock dungeon!/],
-// {
-//    parse: true,
-//  }
-// );
+ mc.addChatPatternSet(
+  "GET_G_ONLINE",
+ [/^(.+) warped the party to a SkyBlock dungeon!/],
+ {
+    parse: true,
+  }
+ );
 
 mc.on("end", () => {
   setTimeout(() => {
