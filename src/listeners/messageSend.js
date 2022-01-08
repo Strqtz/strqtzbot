@@ -2,7 +2,7 @@ import { AkairoMessage, Command, Listener } from "discord-akairo";
 import { Channel, Message, WebhookClient } from "discord.js";
 import MessageExp from "../structures/models/MessageExp.js";
 import Prefix from "../structures/models/Prefix.js";
-// import { mc } from "../index.js";
+import { mc } from "../index.js";
 import wait from "wait";
 
 export default class messageSendListener extends Listener {
