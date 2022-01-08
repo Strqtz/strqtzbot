@@ -77,7 +77,7 @@ export default class PrefixCommand extends Command {
         });
       } else {
         const setPrefixAlready = new MessageEmbed()
-          .setColor(colour)
+          .setColor(this.client.colour)
           .setDescription(`Please add the prefix you want to change to.`)
           .setTimestamp()
           .setFooter(
