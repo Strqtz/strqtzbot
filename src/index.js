@@ -17,7 +17,6 @@ const options = {
 };
 
 export let mc;
-  const gchannel = client.channels.cache.get("904675293640392724");
 
 function init() {
   console.log("Signing in!");
@@ -62,7 +61,8 @@ mc.addChatPatternSet(
   }
  );
 
-mc.on("kick", (reason) => {
+mc.on("kick", async (reason) => {
+  const gchannel = client.channels.cache.get("904675293640392724");
   const kickembed = new MessageEmbed();
   kickembed.setColor("#ff0000").setDescription("The bot was kicked for _" + reason + '_');
   await gchannel.send({ embeds: [kickembed] });
@@ -73,6 +73,7 @@ mc.on("kick", (reason) => {
 });
 
 mc.on("message", async (chatmsg) => {
+  const gchannel = client.channels.cache.get("904675293640392724");
   let msg = chatmsg.toString();
   console.log("Minecraft: ".green + msg);
   if (msg.endsWith(" joined the lobby!") && msg.includes("[MVP+")) {
