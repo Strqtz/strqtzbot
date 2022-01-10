@@ -61,7 +61,7 @@ mc.addChatPatternSet(
   }
  );
 
-mc.on("kick", async (reason) => {
+mc.on("kicked", async (reason) => {
   const gchannel = client.channels.cache.get("904675293640392724");
   const kickembed = new MessageEmbed();
   kickembed.setColor("#ff0000").setDescription("The bot was kicked for _" + reason + '_');
