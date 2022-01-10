@@ -65,7 +65,7 @@ mc.addChatPatternSet(
 mc.on("kick", (reason) => {
   const kickembed = new MessageEmbed();
   kickembed.setColor("#ff0000").setDescription("The bot was kicked for _" + reason + '_');
-  await gchannel.send({ embeds: [embed] });
+  await gchannel.send({ embeds: [kickembed] });
   setTimeout(() => {
     console.log("Connection failed. Retrying..");
     init();
