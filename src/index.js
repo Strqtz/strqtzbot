@@ -87,10 +87,10 @@ mc.on("message", async (chatmsg) => {
       msg = guildless.substr(0, guildless.length);
       let ranklessMsg = msg.replaceAll(/\[(.*?)\]/g, "").split(": ")[0].replaceAll(" ", "");
       console.log(ranklessMsg);
-      if(ranklessMsg.includes(" left.")) {
-        ranklessMsg = ranklessMsg.replace(" left.");
-      } else if(ranklessMsg.includes(" joined.")) {
-        ranklessMsg = ranklessMsg.replace(" joined.");
+      if(ranklessMsg.includes("left.")) {
+        ranklessMsg = ranklessMsg.replace("left.");
+      } else if(ranklessMsg.includes("joined.")) {
+        ranklessMsg = ranklessMsg.replace("joined.");
       }
       embed.setThumbnail(`https://mc-heads.net/avatar/${ranklessMsg}/128.png`)
       if (
