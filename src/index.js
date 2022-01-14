@@ -85,7 +85,8 @@ mc.on("message", async (chatmsg) => {
       const embed = new MessageEmbed();
       const guildless = msg.replace("Guild > ", "");
       msg = guildless.substr(0, guildless.length);
-      const ranklessMsg = msg.replaceAll(/\[(.*?)\]/g, "").split(": ")[0];
+      const ranklessMsg = msg.replaceAll(/\[(.*?)\]/g, "").split(": ")[0].replaceAll(" ", "");
+      console.log(ranklessMsg);
       embed.setThumbnail(`https://mc-heads.net/avatar/${ranklessMsg}/128.png`)
       if (
         msg.includes("[OWNER]") ||
