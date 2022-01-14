@@ -85,8 +85,13 @@ mc.on("message", async (chatmsg) => {
       const embed = new MessageEmbed();
       const guildless = msg.replace("Guild > ", "");
       msg = guildless.substr(0, guildless.length);
-      const ranklessMsg = msg.replaceAll(/\[(.*?)\]/g, "").split(": ")[0].replaceAll(" ", "");
+      let ranklessMsg = msg.replaceAll(/\[(.*?)\]/g, "").split(": ")[0].replaceAll(" ", "");
       console.log(ranklessMsg);
+      if(ranklessMsg.includes(" left.")) {
+        ranklessMsg = ranklessMsg.replace(" left.");
+      } else if(ranklessMsg.includes(" joined.")) {
+        ranklessMsg = ranklessMsg.replace(" joined.");
+      }
       embed.setThumbnail(`https://mc-heads.net/avatar/${ranklessMsg}/128.png`)
       if (
         msg.includes("[OWNER]") ||
