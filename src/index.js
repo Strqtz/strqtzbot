@@ -87,9 +87,9 @@ mc.on("message", async (chatmsg) => {
       msg = guildless.substr(0, guildless.length);
       let ranklessMsg = msg.replaceAll(/\[(.*?)\]/g, "").split(": ")[0];
       if(ranklessMsg.includes(" left.")) {
-        ranklessMsg = ranklessMsg.replace(" left.");
+        ranklessMsg = ranklessMsg.replace(" left.", "");
       } else if(ranklessMsg.includes(" joined.")) {
-        ranklessMsg = ranklessMsg.replace(" joined.");
+        ranklessMsg = ranklessMsg.replace(" joined.", "");
       }
       ranklessMsg = ranklessMsg.replaceAll(" ", "")
       console.log(ranklessMsg);
