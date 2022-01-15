@@ -41,29 +41,36 @@ export default class VerifyCommand extends Command {
 
   async exec(message, args) {
     let HypixelSet;
-HypixelSet = await LinkHypixel.findOne({
-        discordID: message.author.id,
-      });
-      if(!args.mcname) {
-        if(HypixelSet){
-          let uuidreq = await cachios.get(
+    HypixelSet = await LinkHypixel.findOne({
+      discordID: message.author.id,
+      uuid: uuidjson.id,
+    });
+    if (!args.mcname) {
+      if (HypixelSet) {
+        let uuidreq = await cachios.get(
           `https://sessionserver.mojang.com/session/minecraft/profile/${HypixelSet.get(
             "uuid"
           )}`,
           { ttl: 120 }
         );
-           const embed = new MessageEmbed().setDescription("Your linked Minecraft account is " + uuidreq.data.name).setThumbnail(
+        const embed = new MessageEmbed()
+          .setDescription(
+            "Your linked Minecraft account is " + uuidreq.data.name
+          )
+          .setThumbnail(
             `https://crafatar.com/avatars/${uuidreq.data.id}?size=32&overlay&default=717eb72c52024fbaa91a3e61f34b3b58`
           );
-           return await message.util.reply({embeds: [embed]});
-        }else if(!HypixelSet) {
-          return await message.util.reply("Please link your account using \`/verify <ign>\`.");
-        }
+        return await message.util.reply({ embeds: [embed] });
+      } else if (!HypixelSet) {
+        return await message.util.reply(
+          "Please link your account using `/verify <ign>`."
+        );
       }
+    }
     const uuid = await cachios.get(
       "https://api.mojang.com/users/profiles/minecraft/" + args.mcname,
       {
-        ttl: 10,
+        ttl: 60,
       }
     );
     const uuidjson = uuid.data;
@@ -79,7 +86,9 @@ HypixelSet = await LinkHypixel.findOne({
     const correct =
       res.data.player.socialMedia.links.DISCORD === message.author.tag;
     try {
-    const msg = message.util.reply("Linking your account <a:loading:928083841514614795>");
+      const msg = message.util.reply(
+        "Linking your account <a:loading:928083841514614795>"
+      );
       if (correct) {
         if (!HypixelSet) {
           let response = await LinkHypixel.create({
@@ -116,11 +125,12 @@ HypixelSet = await LinkHypixel.findOne({
         const notEqual = new MessageEmbed()
           .setColor("FF0000")
           .setDescription(
-            `The discord linked to your Hypixel account does not match your discord tag.`
+            `The discord linked to your Hypixel account does not match your discord tag. Look below for instructions on how to link your Discord to Hypixel.`
           )
+          .setImage("https://imgur.com/a/Z4Lf8qn")
           .setTimestamp()
           .setFooter(
-            `Executed By ${message.member.displayName}`,
+            `Help video stolen from Necron/FPF`,
             message.member.user.displayAvatarURL({
               size: 64,
               format: "png",

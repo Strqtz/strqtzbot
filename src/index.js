@@ -6,6 +6,7 @@ import { MessageEmbed } from "discord.js";
 import cachios from "cachios";
 import wait from "wait";
 import schedule from "node-schedule";
+import LinkHypixel from "./structures/models/LinkHypixel";
 
 const client = new Client();
 const options = {
@@ -53,18 +54,20 @@ mc.addChatPatternSet(
   }
 );
 
- mc.addChatPatternSet(
+mc.addChatPatternSet(
   "GET_G_ONLINE",
- [/^(.+) warped the party to a SkyBlock dungeon!/],
- {
+  [/^(.+) warped the party to a SkyBlock dungeon!/],
+  {
     parse: true,
   }
- );
+);
 
 mc.on("kicked", async (reason) => {
   const gchannel = client.channels.cache.get("904675293640392724");
   const kickembed = new MessageEmbed();
-  kickembed.setColor("#ff0000").setDescription("The bot was kicked for _" + reason + '_');
+  kickembed
+    .setColor("#ff0000")
+    .setDescription("The bot was kicked for _" + reason + "_");
   await gchannel.send({ embeds: [kickembed] });
   setTimeout(() => {
     console.log("Connection failed. Retrying..");
@@ -83,17 +86,117 @@ mc.on("message", async (chatmsg) => {
   if (!msg.includes("ArmorOfDivan")) {
     if (msg.startsWith("Guild > ")) {
       const embed = new MessageEmbed();
+      let user = msg(/\[(.*?)\]/g, "")
+        .trim()
+        .split(/ +/g)[0];
+      if (isJoinMessage(msg)) {
+        user = msg(/\[(.*?)\]/g, "")
+          .trim()
+          .split(/ +/g)[0];
+
+        embed
+          .setDescription(user + " joined the guild!")
+          .setTitle("Someone Joined :o")
+          .setThumbnail(`https://mc-heads.net/avatar/${user}`)
+          .setColor("#00ff00");
+
+        gchannel.send({ embeds: [embed] });
+        let uuidreq = await cachios.get(
+          `https://api.mojang.com/users/profiles/minecraft/${user}`,
+          { ttl: 120 }
+        );
+        let discord = LinkHypixel.find({ uuid: uuidreq.data.id });
+        if (!discord) {
+          return mc.chat(
+            `/gc ${user} Please do /g discord to join our discord. Then verify and run /verify <YOUR MCNAME> in bot-commands`
+          );
+        }
+        if (discord) {
+          await client.guilds.cache
+            .get("900692529048080424")
+            .members.cache.get(discord.get("discordID"))
+            .roles.add(
+              client.guilds.cache
+                .get("900692529048080424")
+                .roles.cache.get("900693304168030228")
+            );
+        }
+      }
+
+      if (isLeaveMessage(msg)) {
+        user = msg(/\[(.*?)\]/g, "")
+          .trim()
+          .split(/ +/g)[0];
+
+        embed
+          .setDescription(user + " left the guild!")
+          .setTitle("Someone left :c")
+          .setThumbnail(`https://mc-heads.net/avatar/${user}`)
+          .setColor("#ff0000");
+
+        await gchannel.send({ embeds: [embed] });
+        let uuidreq = await cachios.get(
+          `https://api.mojang.com/users/profiles/minecraft/${user}`,
+          { ttl: 120 }
+        );
+        let discord = LinkHypixel.find({ uuid: uuidreq.data.id });
+        if (!discord) {
+          return;
+        }
+        if (discord) {
+          await client.guilds.cache
+            .get("900692529048080424")
+            .members.cache.get(discord.get("discordID"))
+            .roles.remove(
+              client.guilds.cache
+                .get("900692529048080424")
+                .roles.cache.get("900693304168030228")
+            );
+        }
+      }
+
+      if (isKickMessage(msg)) {
+        user = msg(/\[(.*?)\]/g, "")
+          .trim()
+          .split(/ +/g)[0];
+
+        embed
+          .setDescription(user + " was kicked from the guild!")
+          .setTitle("Someone was kicked :skull:")
+          .setThumbnail(`https://mc-heads.net/avatar/${user}`)
+          .setColor("#ff0000");
+
+        gchannel.send({ embeds: [embed] });
+        let uuidreq = await cachios.get(
+          `https://api.mojang.com/users/profiles/minecraft/${user}`,
+          { ttl: 120 }
+        );
+        let discord = LinkHypixel.find({ uuid: uuidreq.data.id });
+        if (!discord) {
+          return;
+        }
+        if (discord) {
+          await client.guilds.cache
+            .get("900692529048080424")
+            .members.cache.get(discord.get("discordID"))
+            .roles.remove(
+              client.guilds.cache
+                .get("900692529048080424")
+                .roles.cache.get("900693304168030228")
+            );
+        }
+      }
       const guildless = msg.replace("Guild > ", "");
       msg = guildless.substr(0, guildless.length);
       let ranklessMsg = msg.replaceAll(/\[(.*?)\]/g, "").split(": ")[0];
-      if(ranklessMsg.includes(" left.")) {
+      if (ranklessMsg.includes(" left.")) {
         ranklessMsg = ranklessMsg.replace(" left.", "");
-      } else if(ranklessMsg.includes(" joined.")) {
+      } else if (ranklessMsg.includes(" joined.")) {
         ranklessMsg = ranklessMsg.replace(" joined.", "");
       }
-      ranklessMsg = ranklessMsg.replaceAll(" ", "")
+      ranklessMsg = ranklessMsg.replaceAll(" ", "");
       console.log(ranklessMsg);
-      embed.setThumbnail(`https://mc-heads.net/avatar/${ranklessMsg}/128.png`)
+      embed.setThumbnail(`https://mc-heads.net/avatar/${ranklessMsg}/128.png`);
       if (
         msg.includes("[OWNER]") ||
         msg.includes("ADMIN") ||
@@ -125,6 +228,20 @@ mc.on("message", async (chatmsg) => {
 });
 function leaveparty() {
   mc.chat(`/p leave`);
+}
+
+function isJoinMessage(message) {
+  return message.includes("joined the guild!") && !message.includes(":");
+}
+
+function isLeaveMessage(message) {
+  return message.includes("left the guild!") && !message.includes(":");
+}
+
+function isKickMessage(message) {
+  return (
+    message.includes("was kicked from the guild by") && !message.includes(":")
+  );
 }
 
 mc.on("chat:PARTY_WARP", ([[username]]) => {
@@ -159,7 +276,7 @@ mc.on("chat:PARTY_INVITE", async ([[rank, username]]) => {
       mc.chat(`/p accept ${username}`);
       limbo();
       wait(5000).then(() => {
-        mc.chat(`/p leave`);
+        leaveparty();
       });
     }
   }

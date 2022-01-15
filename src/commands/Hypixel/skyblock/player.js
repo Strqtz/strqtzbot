@@ -92,6 +92,11 @@ export default class PlayerCommand extends Command {
       return skilla;
     }
 
+    function splitTime(unixtime) {
+      const unixString = unixtime.toString();
+      return unixString.substr(0, unixString.length - 3);
+    }
+
     const lilyweight = new LilyWeight(process.env.apiKey);
 
     try {
@@ -140,19 +145,10 @@ export default class PlayerCommand extends Command {
           { ttl: 60 }
         );
 
-        const response = await cachios.post(
-          `http://hypixelskyblock.superbonecraft.dk:8000/total/${uuiddata.id}`,
-          profilesdata,
+        const senitherreq = await cachios.get(
+          `https://hypixel-api.senither.com/v1/profiles/${uuiddata.id}/last_save_at?key=${process.env.apiKey}`,
           { ttl: 60 }
         );
-
-        const responsepages = await cachios.post(
-          `http://hypixelskyblock.superbonecraft.dk:8000/pages/${uuiddata.id}`,
-          profilesdata,
-          { ttl: 60 }
-        );
-
-        console.log(responsepages.data.storage.prices);
 
         const friendsdata = friendsreq.data;
 
@@ -171,14 +167,29 @@ export default class PlayerCommand extends Command {
 
         const profile = activeProfile.members[uuiddata.id];
 
+        let response;
+
+        try {
+          response = await cachios.post(
+            `https://maro.skybrokers.xyz/api/networth/categories`,
+            { data: profile },
+            { ttl: 60 }
+          );
+        } catch (e) {
+          console.error(e);
+        }
+
+        const res = response.data.data;
+
         const playerdata = playerreq.data;
 
+        const time = splitTime(profile.last_save);
+
         const embed = new MessageEmbed().setDescription(
-          `${uuiddata.name} has **${friendsdata.records.length}** friends.`
+          `${uuiddata.name} last played <t:${time}:R>. ${uuiddata.name} has **${friendsdata.records.length}** friends.`
         );
         const embed2 = new MessageEmbed();
         const embed3 = new MessageEmbed();
-        const embed4 = new MessageEmbed();
 
         const button1 = new MessageButton()
           .setLabel("<=")
@@ -189,28 +200,17 @@ export default class PlayerCommand extends Command {
           .setCustomId("nxtbutton")
           .setStyle("SUCCESS");
 
-        this.embeds = [embed, embed2, embed3, embed4];
+        this.embeds = [embed, embed2, embed3];
 
         this.buttons = [button1, button2];
 
         profile.banking = activeProfile.banking;
-        if (!profile.banking)
-          return await message.util.reply(
-            "<:error:923018104303415326>This command failed, probably because this player has their API off."
-          );
+
         const sa = Humanize.formatNumber(
-          getSA(
-            getLevelFromXP(profile.experience_skill_farming),
-            getLevelFromXP(profile.experience_skill_mining),
-            getLevelFromXP(profile.experience_skill_combat),
-            getLevelFromXP(profile.experience_skill_foraging),
-            getLevelFromXP(profile.experience_skill_fishing),
-            getLevelFromXP(profile.experience_skill_enchanting),
-            getLevelFromXP(profile.experience_skill_alchemy),
-            getLevelFromXP(profile.experience_skill_taming)
-          ),
+          senitherreq.data.data.skills.average_skills,
           2
         );
+
         for (let i = 0; i < ObjectLength(this.embeds); i++) {
           if (playerdata.player.rank) {
             this.embeds[i].setTitle(
@@ -233,117 +233,266 @@ export default class PlayerCommand extends Command {
         }
 
         try {
-          await lilyweight.getWeight(uuiddata.id).then((weight) => {
-            embed.addField(
-              `Weight:`,
-              Humanize.formatNumber(weight.total.toString(), 2)
-            );
-          });
-          embed.addField(`Skill Average:`, `${sa}`);
+          embed.addField(
+            `Senither Weight:`,
+            Humanize.formatNumber(
+              senitherreq.data.data.weight +
+                senitherreq.data.data.weight_overflow,
+              2
+            )
+          );
+          embed.addField(`Skill Average:`, sa);
           embed.addField(
             `Networth:`,
-            "$" + Humanize.formatNumber(response.data.total, 2)
+            "$" + Humanize.formatNumber(res.networth + res.bank + res.purse, 2)
           );
         } catch (e) {
           console.error(e);
-          await message.util.reply(
-            "<:error:923018104303415326>This command failed, probably because this player has their banking API off."
-          );
         }
 
-        await lilyweight.getWeight(uuiddata.id).then((weight) => {
-          embed2
-            .setFields(
-              {
-                name: "Base Skill Weight",
-                value: `${Humanize.formatNumber(weight.skill.base, 2)}`,
-              },
-              {
-                name: "Overflow Skill Weight",
-                value: `${Humanize.formatNumber(weight.skill.overflow, 2)}`,
-              },
-              {
-                name: "Catacombs Exp Weight",
-                value: `${Humanize.formatNumber(
-                  weight.catacombs.experience,
-                  2
-                )}`,
-              },
-              {
-                name: "Slayer Weight",
-                value: `${Humanize.formatNumber(weight.slayer, 2)}`,
-              }
-            )
-            .setDescription(
-              `${uuiddata.name} has **${Humanize.formatNumber(
-                weight.total,
-                2
-              )}** weight.`
-            );
-        });
-        embed3
+        embed2
           .setFields(
             {
-              name: "Farming Level",
-              value: `${Humanize.formatNumber(
-                getLevelFromXP(profile.experience_skill_farming),
+              name: `<:berserk:924858459256660069> Skill Weight _(${Humanize.formatNumber(
+                senitherreq.data.data.skills.weight +
+                  senitherreq.data.data.skills.weight_overflow,
                 2
-              )}`,
+              )} weight)_ :`,
+              value:
+                `**Farming** _(${Humanize.formatNumber(
+                  senitherreq.data.data.skills.farming.weight +
+                    senitherreq.data.data.skills.farming.weight_overflow,
+                  2
+                )} weight)_ → Level ` +
+                Humanize.formatNumber(
+                  senitherreq.data.data.skills.farming.level,
+                  2
+                ) +
+                "\n" +
+                `**Mining** _(${Humanize.formatNumber(
+                  senitherreq.data.data.skills.mining.weight +
+                    senitherreq.data.data.skills.mining.weight_overflow,
+                  2
+                )} weight)_ → Level ` +
+                Humanize.formatNumber(
+                  senitherreq.data.data.skills.mining.level,
+                  2
+                ) +
+                "\n" +
+                `**Combat** _(${Humanize.formatNumber(
+                  senitherreq.data.data.skills.combat.weight +
+                    senitherreq.data.data.skills.combat.weight_overflow,
+                  2
+                )} weight)_ → Level ` +
+                Humanize.formatNumber(
+                  senitherreq.data.data.skills.combat.level,
+                  2
+                ) +
+                "\n" +
+                `**Foraging** _(${Humanize.formatNumber(
+                  senitherreq.data.data.skills.foraging.weight +
+                    senitherreq.data.data.skills.foraging.weight_overflow,
+                  2
+                )} weight)_ → Level ` +
+                Humanize.formatNumber(
+                  senitherreq.data.data.skills.foraging.level,
+                  2
+                ) +
+                "\n" +
+                `**Fishing** _(${Humanize.formatNumber(
+                  senitherreq.data.data.skills.fishing.weight +
+                    senitherreq.data.data.skills.fishing.weight_overflow,
+                  2
+                )} weight)_ → Level ` +
+                Humanize.formatNumber(
+                  senitherreq.data.data.skills.fishing.level,
+                  2
+                ) +
+                "\n" +
+                `**Enchanting** _(${Humanize.formatNumber(
+                  senitherreq.data.data.skills.enchanting.weight +
+                    senitherreq.data.data.skills.enchanting.weight_overflow,
+                  2
+                )} weight)_ → Level ` +
+                Humanize.formatNumber(
+                  senitherreq.data.data.skills.enchanting.level,
+                  2
+                ) +
+                "\n" +
+                `**Alchemy** _(${Humanize.formatNumber(
+                  senitherreq.data.data.skills.alchemy.weight +
+                    senitherreq.data.data.skills.alchemy.weight_overflow,
+                  2
+                )} weight)_ → Level ` +
+                Humanize.formatNumber(
+                  senitherreq.data.data.skills.alchemy.level,
+                  2
+                ) +
+                "\n" +
+                `**Taming** _(${Humanize.formatNumber(
+                  senitherreq.data.data.skills.taming.weight +
+                    senitherreq.data.data.skills.taming.weight_overflow,
+                  2
+                )} weight)_ → Level ` +
+                Humanize.formatNumber(
+                  senitherreq.data.data.skills.taming.level,
+                  2
+                ) +
+                "\n",
             },
             {
-              name: "Mining Level",
-              value: `${Humanize.formatNumber(
-                getLevelFromXP(profile.experience_skill_mining),
+              name: `<:MADDOX:928817710178127902> Slayer Weight _(${Humanize.formatNumber(
+                senitherreq.data.data.slayers.weight +
+                  senitherreq.data.data.slayers.weight_overflow,
                 2
-              )}`,
+              )} weight)_ : `,
+              value:
+                `**Revenant** _(${Humanize.formatNumber(
+                  senitherreq.data.data.slayers.bosses.revenant.weight +
+                    senitherreq.data.data.slayers.bosses.revenant
+                      .weight_overflow,
+                  2
+                )} weight)_ → Experience ${Humanize.compactInteger(
+                  senitherreq.data.data.slayers.bosses.revenant.experience,
+                  1
+                )} _(Level ${Humanize.formatNumber(
+                  senitherreq.data.data.slayers.bosses.revenant.level,
+                  0
+                )})_` +
+                "\n" +
+                `**Tarantula** _(${Humanize.formatNumber(
+                  senitherreq.data.data.slayers.bosses.tarantula.weight +
+                    senitherreq.data.data.slayers.bosses.tarantula
+                      .weight_overflow,
+                  2
+                )} weight)_ → Experience ${Humanize.compactInteger(
+                  senitherreq.data.data.slayers.bosses.tarantula.experience,
+                  1
+                )} _(Level ${Humanize.formatNumber(
+                  senitherreq.data.data.slayers.bosses.tarantula.level,
+                  0
+                )})_` +
+                "\n" +
+                `**Sven** _(${Humanize.formatNumber(
+                  senitherreq.data.data.slayers.bosses.sven.weight +
+                    senitherreq.data.data.slayers.bosses.sven.weight_overflow,
+                  2
+                )} weight)_ → Experience ${Humanize.compactInteger(
+                  senitherreq.data.data.slayers.bosses.sven.experience,
+                  1
+                )} _(Level ${Humanize.formatNumber(
+                  senitherreq.data.data.slayers.bosses.sven.level,
+                  0
+                )})_` +
+                "\n" +
+                `**Enderman** _(${Humanize.formatNumber(
+                  senitherreq.data.data.slayers.bosses.enderman.weight +
+                    senitherreq.data.data.slayers.bosses.enderman
+                      .weight_overflow,
+                  2
+                )} weight)_ → Experience ${Humanize.compactInteger(
+                  senitherreq.data.data.slayers.bosses.enderman.experience,
+                  1
+                )} _(Level ${Humanize.formatNumber(
+                  senitherreq.data.data.slayers.bosses.enderman.level,
+                  0
+                )})_` +
+                "\n",
             },
             {
-              name: "Combat Level",
-              value: `${Humanize.formatNumber(
-                getLevelFromXP(profile.experience_skill_combat),
+              name: `
+<:mort:923849004469616650> Dungeons Weight _(${Humanize.formatNumber(
+                senitherreq.data.data.dungeons.weight +
+                  senitherreq.data.data.dungeons.weight_overflow,
                 2
-              )}`,
-            },
-            {
-              name: "Foraging Level",
-              value: `${Humanize.formatNumber(
-                getLevelFromXP(profile.experience_skill_foraging),
-                2
-              )}`,
-            },
-            {
-              name: "Fishing Level",
-              value: `${Humanize.formatNumber(
-                getLevelFromXP(profile.experience_skill_fishing),
-                2
-              )}`,
-            },
-            {
-              name: "Enchanting Level",
-              value: `${Humanize.formatNumber(
-                getLevelFromXP(profile.experience_skill_enchanting),
-                2
-              )}`,
-            },
-            {
-              name: "Taming Level",
-              value: `${Humanize.formatNumber(
-                getLevelFromXP(profile.experience_skill_taming),
-                2
-              )}`,
-            },
-            {
-              name: "Alchemy Level",
-              value: `${Humanize.formatNumber(
-                getLevelFromXP(profile.experience_skill_alchemy),
-                2
-              )}`,
+              )} weight)_ : `,
+              value:
+                `**Catacombs** _(${Humanize.formatNumber(
+                  senitherreq.data.data.dungeons.types.catacombs.weight +
+                    senitherreq.data.data.dungeons.types.catacombs
+                      .weight_overflow,
+                  2
+                )} weight)_ → Experience ${Humanize.compactInteger(
+                  senitherreq.data.data.dungeons.types.catacombs.experience,
+                  1
+                )} _(Level ${Humanize.formatNumber(
+                  senitherreq.data.data.dungeons.types.catacombs.level,
+                  2
+                )})_` +
+                "\n" +
+                `**Healer** _(${Humanize.formatNumber(
+                  senitherreq.data.data.dungeons.classes.healer.weight +
+                    senitherreq.data.data.dungeons.classes.healer
+                      .weight_overflow,
+                  2
+                )} weight)_ → Experience ${Humanize.compactInteger(
+                  senitherreq.data.data.dungeons.classes.healer.experience,
+                  1
+                )} _(Level ${Humanize.formatNumber(
+                  senitherreq.data.data.dungeons.classes.healer.level,
+                  2
+                )})_` +
+                "\n" +
+                `**Mage** _(${Humanize.formatNumber(
+                  senitherreq.data.data.dungeons.classes.mage.weight +
+                    senitherreq.data.data.dungeons.classes.mage.weight_overflow,
+                  2
+                )} weight)_ → Experience ${Humanize.compactInteger(
+                  senitherreq.data.data.dungeons.classes.mage.experience,
+                  1
+                )} _(Level ${Humanize.formatNumber(
+                  senitherreq.data.data.dungeons.classes.mage.level,
+                  2
+                )})_` +
+                "\n" +
+                `**Berserker** _(${Humanize.formatNumber(
+                  senitherreq.data.data.dungeons.classes.berserker.weight +
+                    senitherreq.data.data.dungeons.classes.berserker
+                      .weight_overflow,
+                  2
+                )} weight)_ → Experience ${Humanize.compactInteger(
+                  senitherreq.data.data.dungeons.classes.berserker.experience,
+                  1
+                )} _(Level ${Humanize.formatNumber(
+                  senitherreq.data.data.dungeons.classes.berserker.level,
+                  2
+                )})_` +
+                "\n" +
+                `**Archer** _(${Humanize.formatNumber(
+                  senitherreq.data.data.dungeons.classes.archer.weight +
+                    senitherreq.data.data.dungeons.classes.archer
+                      .weight_overflow,
+                  2
+                )} weight)_ → Experience ${Humanize.compactInteger(
+                  senitherreq.data.data.dungeons.classes.archer.experience,
+                  1
+                )} _(Level ${Humanize.formatNumber(
+                  senitherreq.data.data.dungeons.classes.archer.level,
+                  2
+                )})_` +
+                "\n" +
+                `**Tank** _(${Humanize.formatNumber(
+                  senitherreq.data.data.dungeons.classes.tank.weight +
+                    senitherreq.data.data.dungeons.classes.tank.weight_overflow,
+                  2
+                )} weight)_ → Experience ${Humanize.compactInteger(
+                  senitherreq.data.data.dungeons.classes.tank.experience,
+                  1
+                )} _(Level ${Humanize.formatNumber(
+                  senitherreq.data.data.dungeons.classes.tank.level,
+                  2
+                )})_`,
             }
           )
-          .setDescription(`**Skill Average:** ${sa}`);
-
-        
-          await pagination(msg, this.embeds, this.buttons, 30000);
+          .setDescription(
+            `${uuiddata.name} has **${Humanize.formatNumber(
+              senitherreq.data.data.weight +
+                senitherreq.data.data.weight_overflow,
+              2
+            )}** weight.`
+          );
+        embed3.setFields();
+        await pagination(msg, this.embeds, this.buttons, 30000);
       }
     } catch (e) {
       console.error(e);

@@ -1,29 +1,25 @@
 import { AkairoMessage, Command } from "discord-akairo";
 
-import { Message } from "discord.js";
+import { Message, User } from "discord.js";
 import cachios from "cachios";
 import { mc } from "../../index.js";
+import LinkHypixel from "../../structures/models/LinkHypixel";
 
-export default class GuildKickCommand extends Command {
+export default class GuildinviteCommand extends Command {
   constructor() {
-    super("guildkick", {
-      aliases: ["guildkick", "gkick"],
+    super("guildinvite", {
+      aliases: ["guildinvite", "ginvite"],
       description: {
-        content: "Kicks a member from the StopThrowing Guild",
-        usage: "guildkick <member> <reason>",
-        examples: ["-gkick TheySimp short"],
+        content: "Shows information about the discord bot",
+        usage: "info",
+        examples: ["-info"],
       },
       channel: "guild",
       args: [
         {
-          id: "gmember",
-          type: "string",
-          description: "A member of the StopThrowing Guild",
-        },
-        {
-          id: "reason",
-          type: "string",
-          description: "The reason for kicking the player",
+          id: "member",
+          type: "userMention",
+          description: "A discord member of the StopThrowing Guild",
         },
       ],
       ownerOnly: true,
@@ -34,33 +30,27 @@ export default class GuildKickCommand extends Command {
 
   /**
    * @param {Message} message
-   * @param {{gmember:string; reason:string}} args
+   * @param {{member:User}} args
    */
 
   async exec(message, args) {
-    const uuidb4data = await cachios.get(
-      `https://api.mojang.com/users/profiles/minecraft/${args.gmember}`,
-      {
-        ttl: 60,
-      }
-    );
-    const uuid = uuidb4data.data;
+    let discordMember = await LinkHypixel.find({ discordID: args.member.id });
+    if (!discordMember)
+      return message.util.reply(
+        `This user hasn't verified! ${args.member} please do \`/verify <YOUR IGN>\``
+      );
+    if (discordMember) {
+      const uuidb4data = await cachios.get(
+        `https://sessionserver.mojang.com/session/minecraft/profile/${discordMember.get(
+          "uuid"
+        )}`,
+        {
+          ttl: 60,
+        }
+      );
+      const uuid = uuidb4data.data;
 
-    const guildreq = await cachios.get(
-      `https://api.hypixel.net/guild?player=${uuid.id}&key=${process.env.apiKey}`
-    );
-
-    const data = guildreq.data;
-
-    if (data.guild != null) {
-      if (data.guild.name === "StopThrowing") {
-        mc.chat(`/g kick ${args.gmember} ${args.reason}`);
-        await message.author.send(`Successfully kicked ${args.gmember}`);
-      } else {
-        await message.author.send(`This user is not in StopThrowing}`);
-      }
-    } else {
-      await message.author.send(`This user isn't even in a guild LMAO`);
+      mc.chat(`/g kick ${uuid.name}`);
     }
   }
 }

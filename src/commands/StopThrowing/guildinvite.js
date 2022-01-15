@@ -1,8 +1,9 @@
 import { AkairoMessage, Command } from "discord-akairo";
 
-import { Message } from "discord.js";
+import { Message, User } from "discord.js";
 import cachios from "cachios";
 import { mc } from "../../index.js";
+import LinkHypixel from "../../structures/models/LinkHypixel";
 
 export default class GuildinviteCommand extends Command {
   constructor() {
@@ -17,8 +18,8 @@ export default class GuildinviteCommand extends Command {
       args: [
         {
           id: "member",
-          type: "string",
-          description: "A member of the StopThrowing Guild",
+          type: "userMention",
+          description: "A discord member of the StopThrowing Guild",
         },
       ],
       ownerOnly: true,
@@ -29,18 +30,31 @@ export default class GuildinviteCommand extends Command {
 
   /**
    * @param {Message} message
-   * @param {{member:string}} args
+   * @param {{member:User}} args
    */
 
   async exec(message, args) {
-    const uuidb4data = await cachios.get(
-      `https://api.mojang.com/users/profiles/minecraft/${args.member}`,
-      {
-        ttl: 60,
-      }
-    );
-    const uuid = uuidb4data.data;
+    let discordMember = await LinkHypixel.find({ discordID: args.member.id });
+    if (!discordMember)
+      return message.util.reply(
+        `This user hasn't verified! ${args.member} please do \`/verify <YOUR IGN>\``
+      );
+    if (discordMember) {
+      const uuidb4data = await cachios.get(
+        `https://sessionserver.mojang.com/session/minecraft/profile/${discordMember.get(
+          "uuid"
+        )}`,
+        {
+          ttl: 60,
+        }
+      );
+      const uuid = uuidb4data.data;
 
-    mc.chat(`/g invite ${uuid.name}`);
+      mc.chat(`/g invite ${uuid.name}`);
+      return message.util.reply(
+        args.member +
+          "You have been invited to join Stop Throwing, you will soon see an invite. Please run `/g accept StopThrowing`"
+      );
+    }
   }
 }
