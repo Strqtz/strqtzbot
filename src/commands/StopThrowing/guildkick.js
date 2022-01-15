@@ -3,7 +3,7 @@ import { AkairoMessage, Command } from "discord-akairo";
 import { Message, User } from "discord.js";
 import cachios from "cachios";
 import { mc } from "../../index.js";
-import LinkHypixel from "../../structures/models/LinkHypixel";
+import LinkHypixel from "../../structures/models/LinkHypixel.js";
 
 export default class GuildinviteCommand extends Command {
   constructor() {

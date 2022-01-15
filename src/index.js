@@ -6,7 +6,7 @@ import { MessageEmbed } from "discord.js";
 import cachios from "cachios";
 import wait from "wait";
 import schedule from "node-schedule";
-import LinkHypixel from "./structures/models/LinkHypixel";
+import LinkHypixel from "./structures/models/LinkHypixel.js";
 
 const client = new Client();
 const options = {
