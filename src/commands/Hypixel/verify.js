@@ -83,6 +83,27 @@ export default class VerifyCommand extends Command {
         ttl: 60,
       }
     );
+    if (!res.data.player.socialMedia) {
+      const notEqual = new MessageEmbed()
+        .setColor("FF0000")
+        .setDescription(
+          `The discord linked to your Hypixel account does not match your discord tag. Look below for instructions on how to link your Discord to Hypixel.`
+        )
+        .setImage("https://imgur.com/a/Z4Lf8qn")
+        .setTimestamp()
+        .setFooter(
+          `Help video stolen from Necron/FPF`,
+          message.member.user.displayAvatarURL({
+            size: 64,
+            format: "png",
+            dynamic: true,
+          })
+        );
+      return await message.util.reply({
+        embeds: [notEqual],
+        ephemeral: true,
+      });
+    }
     const correct =
       res.data.player.socialMedia.links.DISCORD === message.author.tag;
     try {
@@ -121,26 +142,6 @@ export default class VerifyCommand extends Command {
             ephemeral: true,
           });
         }
-      } else {
-        const notEqual = new MessageEmbed()
-          .setColor("FF0000")
-          .setDescription(
-            `The discord linked to your Hypixel account does not match your discord tag. Look below for instructions on how to link your Discord to Hypixel.`
-          )
-          .setImage("https://imgur.com/a/Z4Lf8qn")
-          .setTimestamp()
-          .setFooter(
-            `Help video stolen from Necron/FPF`,
-            message.member.user.displayAvatarURL({
-              size: 64,
-              format: "png",
-              dynamic: true,
-            })
-          );
-        return await message.util.reply({
-          embeds: [notEqual],
-          ephemeral: true,
-        });
       }
     } catch (e) {
       this.client.logging.log("error", e);
