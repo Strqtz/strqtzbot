@@ -116,25 +116,24 @@ export default class VerifyCommand extends Command {
             discordID: message.author.id,
             uuid: uuidjson.id,
           });
-          response.save().then(async () => {
-            const name = new MessageEmbed()
-              .setColor(this.client.colour)
-              .setDescription(
-                `Updated the connected account for ${message.author.username} to ${uuidjson.name}`
-              )
-              .setTimestamp()
-              .setFooter(
-                `Executed By ${message.member.displayName}`,
-                message.member.user.displayAvatarURL({
-                  size: 64,
-                  format: "png",
-                  dynamic: true,
-                })
-              );
-            return await message.util.reply({
-              embeds: [name],
-              ephemeral: true,
-            });
+          await response.save();
+          const name = new MessageEmbed()
+            .setColor(this.client.colour)
+            .setDescription(
+              `Updated the connected account for ${message.author.username} to ${uuidjson.name}`
+            )
+            .setTimestamp()
+            .setFooter(
+              `Executed By ${message.member.displayName}`,
+              message.member.user.displayAvatarURL({
+                size: 64,
+                format: "png",
+                dynamic: true,
+              })
+            );
+          return await message.util.reply({
+            embeds: [name],
+            ephemeral: true,
           });
         } else if (HypixelSet) {
           return await message.util.reply({
