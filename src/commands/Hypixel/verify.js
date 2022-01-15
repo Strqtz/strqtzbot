@@ -43,25 +43,9 @@ export default class VerifyCommand extends Command {
     let HypixelSet;
     HypixelSet = await LinkHypixel.findOne({
       discordID: message.author.id,
-      uuid: uuidjson.id,
     });
     if (!args.mcname) {
-      if (HypixelSet) {
-        let uuidreq = await cachios.get(
-          `https://sessionserver.mojang.com/session/minecraft/profile/${HypixelSet.get(
-            "uuid"
-          )}`,
-          { ttl: 120 }
-        );
-        const embed = new MessageEmbed()
-          .setDescription(
-            "Your linked Minecraft account is " + uuidreq.data.name
-          )
-          .setThumbnail(
-            `https://crafatar.com/avatars/${uuidreq.data.id}?size=32&overlay&default=717eb72c52024fbaa91a3e61f34b3b58`
-          );
-        return await message.util.reply({ embeds: [embed] });
-      } else if (!HypixelSet) {
+      if (!HypixelSet) {
         return await message.util.reply(
           "Please link your account using `/verify <ign>`."
         );
@@ -74,6 +58,7 @@ export default class VerifyCommand extends Command {
       }
     );
     const uuidjson = uuid.data;
+
     const res = await cachios.get(
       `https://api.hypixel.net/player?uuid=` +
         uuidjson.id +
