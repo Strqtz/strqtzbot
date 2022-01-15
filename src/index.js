@@ -86,14 +86,11 @@ mc.on("message", async (chatmsg) => {
   if (!msg.includes("ArmorOfDivan")) {
     if (msg.startsWith("Guild > ")) {
       const embed = new MessageEmbed();
-      let user = msg(/\[(.*?)\]/g, "")
+      let user = msg
+        .replace(/\[(.*?)\]/g, "")
         .trim()
         .split(/ +/g)[0];
       if (isJoinMessage(msg)) {
-        user = msg(/\[(.*?)\]/g, "")
-          .trim()
-          .split(/ +/g)[0];
-
         embed
           .setDescription(user + " joined the guild!")
           .setTitle("Someone Joined :o")
@@ -124,10 +121,6 @@ mc.on("message", async (chatmsg) => {
       }
 
       if (isLeaveMessage(msg)) {
-        user = msg(/\[(.*?)\]/g, "")
-          .trim()
-          .split(/ +/g)[0];
-
         embed
           .setDescription(user + " left the guild!")
           .setTitle("Someone left :c")
@@ -156,10 +149,6 @@ mc.on("message", async (chatmsg) => {
       }
 
       if (isKickMessage(msg)) {
-        user = msg(/\[(.*?)\]/g, "")
-          .trim()
-          .split(/ +/g)[0];
-
         embed
           .setDescription(user + " was kicked from the guild!")
           .setTitle("Someone was kicked :skull:")
