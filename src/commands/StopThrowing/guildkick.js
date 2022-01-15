@@ -5,10 +5,10 @@ import cachios from "cachios";
 import { mc } from "../../index.js";
 import LinkHypixel from "../../structures/models/LinkHypixel.js";
 
-export default class GuildinviteCommand extends Command {
+export default class GuildkickCommand extends Command {
   constructor() {
-    super("guildinvite", {
-      aliases: ["guildinvite", "ginvite"],
+    super("guildkick", {
+      aliases: ["guildkick", "gkick"],
       description: {
         content: "Shows information about the discord bot",
         usage: "info",
