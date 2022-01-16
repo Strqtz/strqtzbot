@@ -87,7 +87,7 @@ mc.on("message", async (chatmsg) => {
     if (msg.startsWith("Guild > ")) {
       const embed = new MessageEmbed();
       let user = msg
-        .replace(/\[(.*?)\]/g, "")
+        .replaceAll(/\[(.*?)\]/g, "")
         .trim()
         .split(/ +/g)[0];
       if (isJoinMessage(msg)) {
