@@ -220,17 +220,20 @@ function leaveparty() {
 }
 
 function isJoinMessage(message) {
-  return message.includes("joined the guild!") && !message.includes(":");
+  if(message.includes("joined the guild!") && !message.includes(":")) {
+     return true;
+  }
 }
 
 function isLeaveMessage(message) {
-  return message.includes("left the guild!") && !message.includes(":");
+  if(message.includes("left the guild!") && !message.includes(":")) {
+     return true;
+  }
 }
-
 function isKickMessage(message) {
-  return (
-    message.includes("was kicked from the guild by") && !message.includes(":")
-  );
+  if(message.includes("was kicked from the guild by") && !message.includes(":")) {
+     return true;
+  }
 }
 
 mc.on("chat:PARTY_WARP", ([[username]]) => {
