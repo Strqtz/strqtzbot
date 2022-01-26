@@ -19,7 +19,7 @@ export default class readyListener extends Listener {
   async exec(guild) {
     this.client.logging.log("info", `${this.client.user.tag} is online`);
     this.client.user.setPresence({
-      activities: [{ name: "With My Balls", type: "PLAYING" }],
+      activities: [{ name: "You Sleep", type: "WATCHING" }],
       status: "dnd",
     });
   }
