@@ -99,7 +99,7 @@ export const pagination = async (
   message,
   pages,
   buttonList,
-  timeout = 120000
+  timeout = 120000,
 ) => {
   if (!pages) throw new Error("Pages are not given.");
   if (!buttonList) throw new Error("Buttons are not given.");

@@ -18,6 +18,7 @@ import {
 } from "../../../structures/Constants/constants.js";
 import wait from "wait";
 import LinkHypixel from "../../../structures/models/LinkHypixel.js";
+import { json } from "express";
 
 export default class PlayerCommand extends Command {
   constructor() {
@@ -97,7 +98,6 @@ export default class PlayerCommand extends Command {
       return unixString.substr(0, unixString.length - 3);
     }
 
-    const lilyweight = new LilyWeight(process.env.apiKey);
 
     try {
       let name;
@@ -169,6 +169,8 @@ export default class PlayerCommand extends Command {
 
         let response;
 
+        profile.banking = activeProfile.banking;
+
         try {
           response = await cachios.post(
             `https://maro.skybrokers.xyz/api/networth/categories`,
@@ -184,6 +186,11 @@ export default class PlayerCommand extends Command {
         const playerdata = playerreq.data;
 
         const time = splitTime(profile.last_save);
+
+        const emojis = await cachios.get(
+          "https://raw.githubusercontent.com/Altpapier/Skyblock-Item-Emojis/main/emojis.json",
+          { ttl: 60000 }
+        );
 
         const embed = new MessageEmbed().setDescription(
           `${uuiddata.name} last played <t:${time}:R>. ${uuiddata.name} has **${friendsdata.records.length}** friends.`
@@ -203,8 +210,6 @@ export default class PlayerCommand extends Command {
         this.embeds = [embed, embed2, embed3];
 
         this.buttons = [button1, button2];
-
-        profile.banking = activeProfile.banking;
 
         const sa = Humanize.formatNumber(
           senitherreq.data.data.skills.average_skills,
@@ -491,7 +496,181 @@ export default class PlayerCommand extends Command {
               2
             )}** weight.`
           );
-        embed3.setFields();
+
+        embed3
+          .addFields(
+            {
+              name: "<:item_289:901956838864588810> Purse:",
+              value: Humanize.compactInteger(res.purse, 2),
+              inline: true,
+            },
+            {
+              name: "<:item_266:901949082745069629> Bank",
+              value: Humanize.compactInteger(res.bank, 2),
+              inline: true,
+            },
+            {
+              name: "<:item_806:902131254483357727> Sacks",
+              value: Humanize.compactInteger(res.sacks, 2),
+              inline: true,
+            }
+          )
+          .setDescription(
+            `${uuiddata.name}'s Total Networth is **${Humanize.formatNumber(
+              res.networth + res.bank + res.purse,
+              2
+            )}**`
+          );
+        const inventories = {
+          armor: "Armour",
+          wardrobe_inventory: "Wardrobe",
+          inventory: "Inventory",
+          storage: "Storage",
+          pets: "Pets",
+          talismans: "Accessories",
+        };
+
+        let armorText = "";
+        let wardrobe_inventoryText = "";
+        let inventoryText = "";
+        let storageText = "";
+        let petsText = "";
+        let talismansText = "";
+
+        if (res.categories.armor) {
+          const categoryArmor = res.categories.armor;
+          for (let i = 0; i < 4; i++) {
+            if (categoryArmor.top_items[i].name) {
+              armorText += categoryArmor.top_items[i].name;
+            }
+            if (categoryArmor.top_items[i].recomb) {
+              armorText += " <:recomb:920527647400919060>";
+            }
+            if (categoryArmor.top_items[i].price) {
+              armorText += ` _(${Humanize.compactInteger(
+                categoryArmor.top_items[i].price,
+                2
+              )})_`;
+            }
+            armorText += "\n";
+          }
+        }
+
+        if (res.categories.wardrobe_inventory) {
+          const categoryWardrobe = res.categories.wardrobe_inventory;
+          for (let i = 0; i < 4; i++) {
+            if (categoryWardrobe.top_items[i].name) {
+              wardrobe_inventoryText += categoryWardrobe.top_items[i].name;
+            }
+            if (categoryWardrobe.top_items[i].recomb) {
+              wardrobe_inventoryText += " <:recomb:920527647400919060>";
+            }
+            if (categoryWardrobe.top_items[i].price) {
+              wardrobe_inventoryText += ` _(${Humanize.compactInteger(
+                categoryWardrobe.top_items[i].price,
+                2
+              )})_`;
+            }
+            wardrobe_inventoryText += "\n";
+          }
+        }
+
+        if (res.categories.inventory) {
+          const categoryInventory = res.categories.inventory;
+          for (let i = 0; i < 4; i++) {
+            if (categoryInventory.top_items[i].name) {
+              inventoryText += categoryInventory.top_items[i].name;
+            }
+            if (categoryInventory.top_items[i].recomb) {
+              inventoryText += " <:recomb:920527647400919060>";
+            }
+            if (categoryInventory.top_items[i].price) {
+              inventoryText += ` _(${Humanize.compactInteger(
+                categoryInventory.top_items[i].price,
+                2
+              )})_`;
+            }
+            inventoryText += "\n";
+          }
+        }
+
+        if (res.categories.storage) {
+          const categoryStorage = res.categories.storage;
+          for (let i = 0; i < 4; i++) {
+            if (categoryStorage.top_items[i].name) {
+              storageText += categoryStorage.top_items[i].name;
+            }
+            if (categoryStorage.top_items[i].recomb) {
+              storageText += " <:recomb:920527647400919060>";
+            }
+            if (categoryStorage.top_items[i].price) {
+              storageText += ` _(${Humanize.compactInteger(
+                categoryStorage.top_items[i].price,
+                2
+              )})_`;
+            }
+            storageText += "\n";
+          }
+        }
+
+        if (res.categories.pets) {
+          const categoryPets = res.categories.pets;
+          for (let i = 0; i < 4; i++) {
+            if (categoryPets.top_items[i].name) {
+              petsText += categoryPets.top_items[i].name;
+            }
+            if (categoryPets.top_items[i].heldItem) {
+              petsText += ` ${
+                emojis.data[categoryPets.top_items[i].heldItem].formatted
+              }`;
+            }
+            if (categoryPets.top_items[i].price) {
+              petsText += ` _(${Humanize.compactInteger(
+                categoryPets.top_items[i].price,
+                2
+              )})_`;
+            }
+            petsText += "\n";
+          }
+        }
+
+        if (res.categories.talismans) {
+          const categoryTalismans = res.categories.talismans;
+          for (let i = 0; i < 4; i++) {
+            if (categoryTalismans.top_items[i].name) {
+              talismansText += categoryTalismans.top_items[i].name;
+            }
+            if (categoryTalismans.top_items[i].recomb) {
+              talismansText += " <:recomb:920527647400919060>";
+            }
+            if (categoryTalismans.top_items[i].price) {
+              talismansText += ` _(${Humanize.compactInteger(
+                categoryTalismans.top_items[i].price,
+                2
+              )})_`;
+            }
+            talismansText += "\n";
+          }
+        }
+
+        const texts = [
+          armorText,
+          wardrobe_inventoryText,
+          inventoryText,
+          storageText,
+          petsText,
+          talismansText,
+        ];
+        let num = 0;
+        for (let item in inventories) {
+          const req = res.categories[item];
+          embed3.addField(
+            inventories[item] +
+              ` _($${Humanize.compactInteger(req.total, 2)})_`,
+            `${texts[num]}`
+          );
+          num = num + 1;
+        }
         await pagination(msg, this.embeds, this.buttons, 30000);
       }
     } catch (e) {

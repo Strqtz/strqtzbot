@@ -1,16 +1,18 @@
 import { AkairoMessage, Command } from "discord-akairo";
-
-import { Message, MessageEmbed } from "discord.js";
-
-import humanize from "humanize-duration";
-import si from "systeminformation";
+import {
+  Message,
+  MessageActionRow,
+  MessageButton,
+  MessageEmbed,
+} from "discord.js";
 
 export default class InfoCommand extends Command {
   constructor() {
     super("info", {
       aliases: ["info"],
       description: {
-        content: "Shows information about the discord bot",
+        content:
+          "Shows information and credits to API's and more, that contributed to the development of this bot!",
         usage: "info",
         examples: ["-info"],
       },
@@ -22,54 +24,27 @@ export default class InfoCommand extends Command {
   }
 
   /**
-   * @param { Message | AkairoMessage}  message
+   * @param {Message | AkairoMessage} message
    */
 
   async exec(message) {
-    const mem = await si.mem();
-    const os = await si.osInfo();
-    const cpu = await si.cpu();
-    const time = si.time().timezoneName;
-    const embed = new MessageEmbed()
-      .setColor(this.client.colour)
-      .addFields({
-        name: "Ping: ",
-        value: `${this.client.ws.ping}ms`,
-        inline: true,
-      })
-      .setTimestamp()
-      .setFooter(
-        `Executed By ${message.member.displayName}`,
-        message.member.user.displayAvatarURL({
-          size: 64,
-          format: "png",
-          dynamic: true,
-        })
-      );
-    embed.addFields(
-      {
-        name: "Uptime:",
-        value: `${humanize(Math.floor(process.uptime() * 1000), {
-          round: true,
-        })}`,
-        inline: true,
-      },
-      {
-        name: "Platform:",
-        value: `${os.platform}, ${os.kernel}`,
-        inline: true,
-      },
-      {
-        name: "CPU Speed:",
-        value: `${cpu.speed} GHz`,
-        inline: true,
-      },
-      {
-        name: "Local Server Timezone:",
-        value: `${time}`,
-        inline: true,
-      }
+    const embed = new MessageEmbed().setTitle("Bot Credits").setTimestamp();
+    embed.setDescription(
+      "Created with [Discord Akairo](https://discord.gg/PDkYeSZnmS) and [Discord.js](https://discord.gg/djs).\n Minecraft Avatar's supplied by [Crafatar](https://crafatar.com/) and [MCHeads](https://mc-heads.net/). Skyblock Item Emojis by [Altpapier](https://discord.com/invite/fd4Be4W). Weight Calculations by [Senither](https://hypixel-api.senither.com/). Networth Calculations created by [Nariah](https://discord.gg/4K5bgbvHdj) and hosted by [SkyBrokers](https://discord.gg/ssb)."
     );
-    await message.util.reply({ embeds: [embed], ephemeral: true });
+    const components = new MessageActionRow().addComponents(
+      new MessageButton()
+        .setStyle("LINK")
+        .setLabel("Github Repo")
+        .setURL("https://github.com/Strqtz/strqtzbot"),
+      new MessageButton()
+        .setStyle("LINK")
+        .setLabel("StopThrowing")
+        .setURL("https://discord.gg/R8sxj8ZJns")
+    );
+    return await message.util.reply({
+      embeds: [embed],
+      components: [components],
+    });
   }
 }

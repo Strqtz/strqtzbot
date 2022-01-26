@@ -83,7 +83,10 @@ export default class VerifyCommand extends Command {
         ttl: 60,
       }
     );
-    if (!res.data.player.socialMedia) {
+    if (
+      !res.data.player.socialMedia ||
+      res.data.player.socialMedia.links.DISCORD !== message.author.tag
+    ) {
       const notEqual = new MessageEmbed()
         .setColor("FF0000")
         .setDescription(

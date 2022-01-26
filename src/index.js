@@ -112,10 +112,10 @@ mc.on("message", async (chatmsg) => {
           await client.guilds.cache
             .get("900692529048080424")
             .members.cache.get(discord.get("discordID"))
-            .roles.add(
+            .roles.remove(
               client.guilds.cache
                 .get("900692529048080424")
-                .roles.cache.get("900693304168030228")
+                .roles.cache.get("900693304168030228").id
             );
         }
       }
@@ -143,7 +143,7 @@ mc.on("message", async (chatmsg) => {
             .roles.remove(
               client.guilds.cache
                 .get("900692529048080424")
-                .roles.cache.get("900693304168030228")
+                .roles.cache.get("900693304168030228").id
             );
         }
       }
@@ -171,7 +171,7 @@ mc.on("message", async (chatmsg) => {
             .roles.remove(
               client.guilds.cache
                 .get("900692529048080424")
-                .roles.cache.get("900693304168030228")
+                .roles.cache.get("900693304168030228").id
             );
         }
       }
@@ -220,19 +220,22 @@ function leaveparty() {
 }
 
 function isJoinMessage(message) {
-  if(message.includes("joined the guild!") && !message.includes(":")) {
-     return true;
+  if (message.includes("joined the guild!") && !message.includes(":")) {
+    return true;
   }
 }
 
 function isLeaveMessage(message) {
-  if(message.includes("left the guild!") && !message.includes(":")) {
-     return true;
+  if (message.includes("left the guild!") && !message.includes(":")) {
+    return true;
   }
 }
 function isKickMessage(message) {
-  if(message.includes("was kicked from the guild by") && !message.includes(":")) {
-     return true;
+  if (
+    message.includes("was kicked from the guild by") &&
+    !message.includes(":")
+  ) {
+    return true;
   }
 }
 

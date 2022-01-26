@@ -34,7 +34,8 @@ export default class GuildkickCommand extends Command {
    */
 
   async exec(message, args) {
-    let discordMember = await LinkHypixel.find({ discordID: args.member.id });
+    let discordMember;
+    discordMember = await LinkHypixel.find({ discordID: args.member.id });
     if (!discordMember)
       return message.util.reply(
         `This user hasn't verified! ${args.member} please do \`/verify <YOUR IGN>\``
