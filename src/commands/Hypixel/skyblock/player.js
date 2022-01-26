@@ -666,12 +666,14 @@ export default class PlayerCommand extends Command {
           const req = res.categories[item];
           console.log(item);
           if(!req.total) return embed.addField(inventories[item] + "_($0)_", "No items.");
-          embed3.addField(
+          if(req.total){
+            embed3.addField(
             inventories[item] +
               ` _($${Humanize.compactInteger(req.total, 2)})_`,
             `${texts[num]}`
           );
           num = num + 1;
+         }
         }
         await pagination(msg, this.embeds, this.buttons, 30000);
       }
