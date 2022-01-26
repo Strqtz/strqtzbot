@@ -665,6 +665,7 @@ export default class PlayerCommand extends Command {
         for (let item in inventories) {
           const req = res.categories[item];
           console.log(item);
+          if(!req.total) return embed.addField(inventories[item] + "_($0)_", "No items.");
           embed3.addField(
             inventories[item] +
               ` _($${Humanize.compactInteger(req.total, 2)})_`,
