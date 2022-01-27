@@ -99,7 +99,7 @@ export const pagination = async (
   message,
   pages,
   buttonList,
-  timeout = 120000,
+  timeout = 120000
 ) => {
   if (!pages) throw new Error("Pages are not given.");
   if (!buttonList) throw new Error("Buttons are not given.");
@@ -145,19 +145,6 @@ export const pagination = async (
       components: [row],
     });
     collector.resetTimer();
-  });
-
-  collector.on("end", () => {
-    if (!curPage.deleted) {
-      const disabledRow = new MessageActionRow().addComponents(
-        buttonList[0].setDisabled(true),
-        buttonList[1].setDisabled(true)
-      );
-      curPage.edit({
-        embeds: [pages[page].setFooter(`Page ${page + 1} / ${pages.length}`)],
-        components: [disabledRow],
-      });
-    }
   });
 
   return curPage;

@@ -98,7 +98,6 @@ export default class PlayerCommand extends Command {
       return unixString.substr(0, unixString.length - 3);
     }
 
-
     try {
       let name;
       name = await LinkHypixel.findOne({
@@ -182,6 +181,8 @@ export default class PlayerCommand extends Command {
         }
 
         const res = response.data.data;
+
+        console.log(res.categories.storage.top_items[0].count);
 
         const playerdata = playerreq.data;
 
@@ -508,38 +509,60 @@ export default class PlayerCommand extends Command {
               name: "<:item_266:901949082745069629> Bank",
               value: Humanize.compactInteger(res.bank, 2),
               inline: true,
-            },
-            {
-              name: "<:item_806:902131254483357727> Sacks",
-              value: Humanize.compactInteger(res.sacks, 2),
-              inline: true,
             }
           )
           .setDescription(
-            `${uuiddata.name}'s Total Networth is **${Humanize.formatNumber(
+            `${uuiddata.name}'s Total Networth is **$${Humanize.formatNumber(
               res.networth + res.bank + res.purse,
               2
             )}**`
           );
+
+        if (res.sacks) {
+          embed3.addField(
+            "<:Sack_Of_Sacks:936101156290191421> Sacks",
+            Humanize.compactInteger(res.sacks, 2),
+            true
+          );
+        }
+
         const inventories = {
-          armor: "Armour",
-          wardrobe_inventory: "Wardrobe",
-          inventory: "Inventory",
-          storage: "Storage",
-          pets: "Pets",
-          talismans: "Accessories",
+          armor: "<:tank:924858459428618342> Armour",
+          wardrobe_inventory: "<:item_2875:902830721897472010> Wardrobe",
+          inventory: "<:item_1515:902370580647534633> Inventory",
+          enderchest: "<:item_447:902010140163711067> Ender Chest",
+          storage: "<:item_1449:902348308687777822> Storage",
+          pets: "<:item_3796:903200953082200065> Pets",
+          talismans: "<:item_1877:902492754804899840> Accessories",
         };
 
         let armorText = "";
         let wardrobe_inventoryText = "";
         let inventoryText = "";
+        let enderchestText = "";
         let storageText = "";
         let petsText = "";
         let talismansText = "";
 
-        if (res.categories.armor) {
+        let repeatArmor;
+        let repeatWardrobe_inventory;
+        let repeatInventory;
+        let repeatEnderchest;
+        let repeatStorage;
+        let repeatPets;
+        let repeatTalismans;
+
+        if (res.categories.armor.total > 0) {
           const categoryArmor = res.categories.armor;
-          for (let i = 0; i < 4; i++) {
+          if (4 < categoryArmor.top_items.length + 1) {
+            repeatArmor = 4;
+          } else if (4 > categoryArmor.top_items.length + 1) {
+            repeatArmor = categoryArmor.top_items.length;
+          }
+          for (let i = 0; i < repeatArmor; i++) {
+            if (categoryArmor.top_items[i].count > 1) {
+              armorText += `${categoryArmor.top_items[i]["count"]}x `;
+            }
             if (categoryArmor.top_items[i].name) {
               armorText += categoryArmor.top_items[i].name;
             }
@@ -554,30 +577,52 @@ export default class PlayerCommand extends Command {
             }
             armorText += "\n";
           }
+        } else {
+          armorText += "No Items tf";
         }
 
-        if (res.categories.wardrobe_inventory) {
-          const categoryWardrobe = res.categories.wardrobe_inventory;
-          for (let i = 0; i < 4; i++) {
-            if (categoryWardrobe.top_items[i].name) {
-              wardrobe_inventoryText += categoryWardrobe.top_items[i].name;
+        if (res.categories.wardrobe_inventory.total > 0) {
+          const categoryWardrobe_inventory = res.categories.wardrobe_inventory;
+          if (4 < categoryWardrobe_inventory.top_items.length) {
+            repeatWardrobe_inventory = 4;
+          } else if (4 > categoryWardrobe_inventory.top_items.length) {
+            repeatWardrobe_inventory =
+              categoryWardrobe_inventory.top_items.length;
+          }
+          for (let i = 0; i < repeatWardrobe_inventory; i++) {
+            if (categoryWardrobe_inventory.top_items[i].count > 1) {
+              wardrobe_inventoryText += `${categoryWardrobe_inventory.top_items[i]["count"]}x `;
             }
-            if (categoryWardrobe.top_items[i].recomb) {
+            if (categoryWardrobe_inventory.top_items[i].name) {
+              wardrobe_inventoryText +=
+                categoryWardrobe_inventory.top_items[i].name;
+            }
+            if (categoryWardrobe_inventory.top_items[i].recomb) {
               wardrobe_inventoryText += " <:recomb:920527647400919060>";
             }
-            if (categoryWardrobe.top_items[i].price) {
+            if (categoryWardrobe_inventory.top_items[i].price) {
               wardrobe_inventoryText += ` _(${Humanize.compactInteger(
-                categoryWardrobe.top_items[i].price,
+                categoryWardrobe_inventory.top_items[i].price,
                 2
               )})_`;
             }
             wardrobe_inventoryText += "\n";
           }
+        } else {
+          wardrobe_inventoryText += "No Items tf";
         }
 
-        if (res.categories.inventory) {
+        if (res.categories.inventory.total > 0) {
           const categoryInventory = res.categories.inventory;
-          for (let i = 0; i < 4; i++) {
+          if (4 < categoryInventory.top_items.length) {
+            repeatInventory = 4;
+          } else if (4 > categoryInventory.top_items.length) {
+            repeatInventory = categoryInventory.top_items.length;
+          }
+          for (let i = 0; i < repeatInventory; i++) {
+            if (categoryInventory.top_items[i].count > 1) {
+              inventoryText += `${categoryInventory.top_items[i]["count"]}x `;
+            }
             if (categoryInventory.top_items[i].name) {
               inventoryText += categoryInventory.top_items[i].name;
             }
@@ -592,11 +637,50 @@ export default class PlayerCommand extends Command {
             }
             inventoryText += "\n";
           }
+        } else {
+          inventoryText += "No Items tf";
         }
 
-        if (res.categories.storage) {
+        if (res.categories.enderchest.total > 0) {
+          const categoryEnderChest = res.categories.enderchest;
+          if (4 < categoryEnderChest.top_items.length) {
+            repeatEnderchest = 4;
+          } else if (4 > categoryEnderChest.top_items.length) {
+            repeatEnderchest = categoryEnderChest.top_items.length;
+          }
+          for (let i = 0; i < repeatEnderchest; i++) {
+            if (categoryEnderChest.top_items[i].count > 1) {
+              enderchestText += `${categoryEnderChest.top_items[i]["count"]}x `;
+            }
+            if (categoryEnderChest.top_items[i].name) {
+              enderchestText += categoryEnderChest.top_items[i].name;
+            }
+            if (categoryEnderChest.top_items[i].recomb) {
+              enderchestText += " <:recomb:920527647400919060>";
+            }
+            if (categoryEnderChest.top_items[i].price) {
+              enderchestText += ` _(${Humanize.compactInteger(
+                categoryEnderChest.top_items[i].price,
+                2
+              )})_`;
+            }
+            enderchestText += "\n";
+          }
+        } else {
+          enderchestText += "No Items tf";
+        }
+
+        if (res.categories.storage.total > 0) {
           const categoryStorage = res.categories.storage;
-          for (let i = 0; i < 4; i++) {
+          if (4 < categoryStorage.top_items.length) {
+            repeatStorage = 4;
+          } else if (4 > categoryStorage.top_items.length) {
+            repeatStorage = categoryStorage.top_items.length;
+          }
+          for (let i = 0; i < repeatStorage; i++) {
+            if (categoryStorage.top_items[i].count > 1) {
+              storageText += `${categoryStorage.top_items[i]["count"]}x `;
+            }
             if (categoryStorage.top_items[i].name) {
               storageText += categoryStorage.top_items[i].name;
             }
@@ -611,18 +695,26 @@ export default class PlayerCommand extends Command {
             }
             storageText += "\n";
           }
+        } else {
+          storageText += "No Items tf";
         }
 
-        if (res.categories.pets) {
+        if (res.categories.pets.total > 0) {
           const categoryPets = res.categories.pets;
-          for (let i = 0; i < 4; i++) {
+          if (4 < categoryPets.top_items.length) {
+            repeatPets = 4;
+          } else if (4 > categoryPets.top_items.length) {
+            repeatPets = categoryPets.top_items.length;
+          }
+          for (let i = 0; i < repeatPets; i++) {
+            if (categoryPets.top_items[i].count > 1) {
+              petsText += `${categoryPets.top_items[i]["count"]}x `;
+            }
             if (categoryPets.top_items[i].name) {
               petsText += categoryPets.top_items[i].name;
             }
-            if (categoryPets.top_items[i].heldItem) {
-              petsText += ` ${
-                emojis.data[categoryPets.top_items[i].heldItem].formatted
-              }`;
+            if (categoryPets.top_items[i].recomb) {
+              petsText += " <:recomb:920527647400919060>";
             }
             if (categoryPets.top_items[i].price) {
               petsText += ` _(${Humanize.compactInteger(
@@ -632,11 +724,21 @@ export default class PlayerCommand extends Command {
             }
             petsText += "\n";
           }
+        } else {
+          petsText += "No Items tf";
         }
 
-        if (res.categories.talismans) {
+        if (res.categories.talismans.total > 0) {
           const categoryTalismans = res.categories.talismans;
-          for (let i = 0; i < 4; i++) {
+          if (4 < categoryTalismans.top_items.length) {
+            repeatTalismans = 4;
+          } else if (4 > categoryTalismans.top_items.length) {
+            repeatTalismans = categoryTalismans.top_items.length;
+          }
+          for (let i = 0; i < repeatTalismans; i++) {
+            if (categoryTalismans.top_items[i].count > 1) {
+              talismansText += `${categoryTalismans.top_items[i]["count"]}x `;
+            }
             if (categoryTalismans.top_items[i].name) {
               talismansText += categoryTalismans.top_items[i].name;
             }
@@ -651,31 +753,36 @@ export default class PlayerCommand extends Command {
             }
             talismansText += "\n";
           }
+        } else {
+          talismansText += "No Items tf";
         }
 
-        const texts = [
-          armorText,
-          wardrobe_inventoryText,
-          inventoryText,
-          storageText,
-          petsText,
-          talismansText,
-        ];
-        let num = 0;
+        const texts = {
+          armor: armorText,
+          wardrobe_inventory: wardrobe_inventoryText,
+          inventory: inventoryText,
+          enderchest: enderchestText,
+          storage: storageText,
+          pets: petsText,
+          talismans: talismansText,
+        };
+        let txt;
         for (let item in inventories) {
-          const req = res.categories[item];
-          console.log(item);
-          if(!req.total) return embed.addField(inventories[item] + "_($0)_", "No items.");
-          if(req.total){
+          if (res.categories[item]) {
+            const req = res.categories[item];
+            if (req) {
+              txt = Humanize.compactInteger(req.total, 2);
+            } else if (!req) {
+              txt = "$0";
+            }
+            console.log(item);
             embed3.addField(
-            inventories[item] +
-              ` _($${Humanize.compactInteger(req.total, 2)})_`,
-            `${texts[num]}`
-          );
-          num = num + 1;
-         }
+              inventories[item] + ` _($${txt})_`,
+              `${texts[item]}`
+            );
+          }
         }
-        await pagination(msg, this.embeds, this.buttons, 30000);
+        return await pagination(msg, this.embeds, this.buttons, 30000);
       }
     } catch (e) {
       console.error(e);
