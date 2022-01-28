@@ -182,8 +182,6 @@ export default class PlayerCommand extends Command {
 
         const res = response.data.data;
 
-        console.log(res.categories.storage.top_items[0].count);
-
         const playerdata = playerreq.data;
 
         const time = splitTime(profile.last_save);
@@ -561,7 +559,7 @@ export default class PlayerCommand extends Command {
           }
           for (let i = 0; i < repeatArmor; i++) {
             if (categoryArmor.top_items[i].count > 1) {
-              armorText += `${categoryArmor.top_items[i]["count"]}x `;
+              armorText += `${categoryArmor.top_items[i].count}x `;
             }
             if (categoryArmor.top_items[i].name) {
               armorText += categoryArmor.top_items[i].name;
@@ -570,10 +568,10 @@ export default class PlayerCommand extends Command {
               armorText += " <:recomb:920527647400919060>";
             }
             if (categoryArmor.top_items[i].price) {
-              armorText += ` _(${Humanize.compactInteger(
+              armorText += ` *(${Humanize.compactInteger(
                 categoryArmor.top_items[i].price,
                 2
-              )})_`;
+              )})*`;
             }
             armorText += "\n";
           }
@@ -601,10 +599,10 @@ export default class PlayerCommand extends Command {
               wardrobe_inventoryText += " <:recomb:920527647400919060>";
             }
             if (categoryWardrobe_inventory.top_items[i].price) {
-              wardrobe_inventoryText += ` _(${Humanize.compactInteger(
+              wardrobe_inventoryText += ` *(${Humanize.compactInteger(
                 categoryWardrobe_inventory.top_items[i].price,
                 2
-              )})_`;
+              )})*`;
             }
             wardrobe_inventoryText += "\n";
           }
@@ -630,10 +628,10 @@ export default class PlayerCommand extends Command {
               inventoryText += " <:recomb:920527647400919060>";
             }
             if (categoryInventory.top_items[i].price) {
-              inventoryText += ` _(${Humanize.compactInteger(
+              inventoryText += ` *(${Humanize.compactInteger(
                 categoryInventory.top_items[i].price,
                 2
-              )})_`;
+              )})*`;
             }
             inventoryText += "\n";
           }
@@ -650,7 +648,7 @@ export default class PlayerCommand extends Command {
           }
           for (let i = 0; i < repeatEnderchest; i++) {
             if (categoryEnderChest.top_items[i].count > 1) {
-              enderchestText += `${categoryEnderChest.top_items[i]["count"]}x `;
+              enderchestText += `${categoryEnderChest.top_items[i].count}x `;
             }
             if (categoryEnderChest.top_items[i].name) {
               enderchestText += categoryEnderChest.top_items[i].name;
@@ -659,10 +657,10 @@ export default class PlayerCommand extends Command {
               enderchestText += " <:recomb:920527647400919060>";
             }
             if (categoryEnderChest.top_items[i].price) {
-              enderchestText += ` _(${Humanize.compactInteger(
+              enderchestText += ` *(${Humanize.compactInteger(
                 categoryEnderChest.top_items[i].price,
                 2
-              )})_`;
+              )})*`;
             }
             enderchestText += "\n";
           }
@@ -688,10 +686,10 @@ export default class PlayerCommand extends Command {
               storageText += " <:recomb:920527647400919060>";
             }
             if (categoryStorage.top_items[i].price) {
-              storageText += ` _(${Humanize.compactInteger(
+              storageText += ` *(${Humanize.compactInteger(
                 categoryStorage.top_items[i].price,
                 2
-              )})_`;
+              )})*`;
             }
             storageText += "\n";
           }
@@ -713,14 +711,16 @@ export default class PlayerCommand extends Command {
             if (categoryPets.top_items[i].name) {
               petsText += categoryPets.top_items[i].name;
             }
-            if (categoryPets.top_items[i].recomb) {
-              petsText += " <:recomb:920527647400919060>";
+            if (categoryPets.top_items[i].heldItem) {
+              petsText += ` ${
+                emojis.data[categoryPets.top_items[i].heldItem].formatted
+              }`;
             }
             if (categoryPets.top_items[i].price) {
-              petsText += ` _(${Humanize.compactInteger(
+              petsText += ` *(${Humanize.compactInteger(
                 categoryPets.top_items[i].price,
                 2
-              )})_`;
+              )})*`;
             }
             petsText += "\n";
           }
@@ -746,10 +746,10 @@ export default class PlayerCommand extends Command {
               talismansText += " <:recomb:920527647400919060>";
             }
             if (categoryTalismans.top_items[i].price) {
-              talismansText += ` _(${Humanize.compactInteger(
+              talismansText += ` *(${Humanize.compactInteger(
                 categoryTalismans.top_items[i].price,
                 2
-              )})_`;
+              )})*`;
             }
             talismansText += "\n";
           }
@@ -775,9 +775,8 @@ export default class PlayerCommand extends Command {
             } else if (!req) {
               txt = "$0";
             }
-            console.log(item);
             embed3.addField(
-              inventories[item] + ` _($${txt})_`,
+              inventories[item] + ` *($${txt})*`,
               `${texts[item]}`
             );
           }

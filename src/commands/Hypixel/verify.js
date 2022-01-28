@@ -92,7 +92,7 @@ export default class VerifyCommand extends Command {
         .setDescription(
           `The discord linked to your Hypixel account does not match your discord tag. Look below for instructions on how to link your Discord to Hypixel.`
         )
-        .setImage("https://imgur.com/a/Z4Lf8qn")
+        .setImage("https://i.imgur.com/LpvSdJP.gif")
         .setTimestamp()
         .setFooter(
           `Help video stolen from Necron/FPF`,
@@ -134,6 +134,7 @@ export default class VerifyCommand extends Command {
                 dynamic: true,
               })
             );
+
           return await message.util.reply({
             embeds: [name],
             ephemeral: true,

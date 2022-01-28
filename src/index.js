@@ -69,10 +69,7 @@ mc.on("kicked", async (reason) => {
     .setColor("#ff0000")
     .setDescription("The bot was kicked for _" + reason + "_");
   await gchannel.send({ embeds: [kickembed] });
-  setTimeout(() => {
-    console.log("Connection failed. Retrying..");
-    init();
-  }, 60000);
+  init();
 });
 
 mc.on("message", async (chatmsg) => {
