@@ -1,6 +1,8 @@
 import { Listener } from "discord-akairo";
 import { Guild } from "discord.js";
 import Prefix from "../structures/models/Prefix.js";
+import GuildSettings from "../structures/models/GuildSettings.js";
+import GuildSetting from "../structures/models/GuildSettings.js";
 
 export default class guildCreateListener extends Listener {
   constructor() {
@@ -15,12 +17,12 @@ export default class guildCreateListener extends Listener {
    */
 
   async exec(guild) {
-    let prefixSet;
-    prefixSet = await Prefix.findOne({
+    let settings;
+    settings = await GuildSetting.findOne({
       guildID: guild.id,
     });
-    if (!prefixSet) {
-      let response = await Prefix.create({
+    if (!settings) {
+      let response = await GuildSetting.create({
         guildID: guild.id,
       });
       await response.save();

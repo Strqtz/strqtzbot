@@ -6,3 +6,4 @@ error.log
 .prettierignore
 .prettierrc.json
 .gitignore
+packs/

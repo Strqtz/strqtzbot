@@ -1,3 +1,5 @@
+import Humanize from "humanize-plus";
+
 export const skillXPPerLevel = [
   0, 50, 125, 200, 300, 500, 750, 1000, 1500, 2000, 3500, 5000, 7500, 10000,
   15000, 20000, 30000, 50000, 75000, 100000, 200000, 300000, 400000, 500000,
@@ -54,6 +56,14 @@ export const getActiveProfile = function (profiles, uuid) {
   return profiles.sort(
     (a, b) => b.members[uuid].last_save - a.members[uuid].last_save
   )[0];
+};
+
+export const getProfile = function (profiles, cuteName) {
+  for (let profile of profiles) {
+    if (profile.cute_name == Humanize.capitalize(cuteName, true)) {
+      return profile;
+    }
+  }
 };
 
 export const getActiveProfileCuteName = function (profiles, uuid) {

@@ -25,12 +25,17 @@ function init() {
   mc._client.once("session", (session) => (options.session = session));
 }
 
+function reInit() {
+  mc.exit();
+  init();
+}
+
 function limbo() {
   mc.chat("/achat §c");
 }
 
 try {
-  client.run();
+  client.run(client);
   init();
 } catch (e) {
   console.log(e);
@@ -69,13 +74,17 @@ mc.on("kicked", async (reason) => {
     .setColor("#ff0000")
     .setDescription("The bot was kicked for _" + reason + "_");
   await gchannel.send({ embeds: [kickembed] });
-  init();
+  await reInit();
+});
+
+mc.on("end", () => {
+  reInit();
 });
 
 mc.on("message", async (chatmsg) => {
-  const gchannel = client.channels.cache.get("904675293640392724");
   let msg = chatmsg.toString();
   console.log("Minecraft: ".green + msg);
+  const gchannel = client.channels.cache.get("904675293640392724");
   if (msg.endsWith(" joined the lobby!") && msg.includes("[MVP+")) {
     limbo();
     console.log("Sending to limbo.");
@@ -94,7 +103,7 @@ mc.on("message", async (chatmsg) => {
           .setThumbnail(`https://mc-heads.net/avatar/${user}`)
           .setColor("#00ff00");
 
-        gchannel.send({ embeds: [embed] });
+        gchannel.sendNew({ embeds: [embed] });
         let uuidreq = await cachios.get(
           `https://api.mojang.com/users/profiles/minecraft/${user}`,
           { ttl: 120 }
@@ -151,7 +160,6 @@ mc.on("message", async (chatmsg) => {
           .setTitle("Someone was kicked :skull:")
           .setThumbnail(`https://mc-heads.net/avatar/${user}`)
           .setColor("#ff0000");
-
         gchannel.send({ embeds: [embed] });
         let uuidreq = await cachios.get(
           `https://api.mojang.com/users/profiles/minecraft/${user}`,
@@ -182,27 +190,29 @@ mc.on("message", async (chatmsg) => {
       }
       ranklessMsg = ranklessMsg.replaceAll(" ", "");
       console.log(ranklessMsg);
-      embed.setThumbnail(`https://mc-heads.net/avatar/${ranklessMsg}/128.png`);
+      embed
+        .setThumbnail(`https://mc-heads.net/avatar/${ranklessMsg}/128.png`)
+        .setTitle(ranklessMsg);
       if (
-        msg.includes("[OWNER]") ||
-        msg.includes("ADMIN") ||
-        msg.includes("[YOUTUBER]")
+        msg.startsWith("[OWNER]") ||
+        msg.startsWith("ADMIN") ||
+        msg.startsWith("[YOUTUBER]")
       ) {
         embed.setColor("#FF5555").setDescription(msg);
         await gchannel.send({ embeds: [embed] });
-      } else if (msg.includes("[MVP++]")) {
+      } else if (msg.startsWith("[MVP++]")) {
         embed.setColor("#FFAA00").setDescription(msg);
         await gchannel.send({ embeds: [embed] });
-      } else if (msg.includes("[MVP+]") || msg.includes("[MVP]")) {
+      } else if (msg.startsWith("[MVP+]") || msg.startsWith("[MVP]")) {
         embed.setColor("#3CE6E6").setDescription(msg);
         await gchannel.send({ embeds: [embed] });
-      } else if (msg.includes("[VIP+]") || msg.includes("[VIP]")) {
+      } else if (msg.startsWith("[VIP+]") || msg.startsWith("[VIP]")) {
         embed.setColor("#3CE63C").setDescription(msg);
         await gchannel.send({ embeds: [embed] });
-      } else if (msg.includes("joined.")) {
+      } else if (msg.includes("joined.") && !msg.includes(":")) {
         embed.setColor("#00ff00").setDescription(msg);
         await gchannel.send({ embeds: [embed] });
-      } else if (msg.includes("left.")) {
+      } else if (msg.includes("left.") && !msg.includes(":")) {
         embed.setColor("#ff0000").setDescription(msg);
         await gchannel.send({ embeds: [embed] });
       } else {
@@ -265,10 +275,21 @@ mc.on("chat:PARTY_INVITE", async ([[rank, username]]) => {
 
   if (data.guild != null) {
     if (data.guild.name === "StopThrowing") {
+      const gchannel = client.channels.cache.get("904675293640392724");
+      let embed = new MessageEmbed()
+        .setTitle("Joined " + uuid.name + "'s party!")
+        .setImage(`https://mc-heads.net/avatar/${uuid.name}/128.png`)
+        .setColor("#00ff00");
       mc.chat(`/p accept ${username}`);
+      await gchannel.send({ embeds: [embed] });
       limbo();
-      wait(5000).then(() => {
+      wait(5000).then(async () => {
         leaveparty();
+        embed = new MessageEmbed()
+          .setTitle("Left " + uuid.name + "'s party.")
+          .setImage(`https://mc-heads.net/avatar/${uuid.name}/128.png`)
+          .setColor("#ff0000");
+        await gchannel.send({ embeds: [embed] });
       });
     }
   }

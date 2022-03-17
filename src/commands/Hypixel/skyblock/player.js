@@ -15,10 +15,12 @@ import {
   removeUnderscorePlus,
   getActiveProfile,
   ObjectLength,
+  getProfile,
 } from "../../../structures/Constants/constants.js";
-import wait from "wait";
+//  import wait from "wait";
 import LinkHypixel from "../../../structures/models/LinkHypixel.js";
-import { json } from "express";
+//  import { json } from "express";
+import { generateNetworthEmbed } from "../../../structures/Constants/functions.js";
 
 export default class PlayerCommand extends Command {
   constructor() {
@@ -45,6 +47,12 @@ export default class PlayerCommand extends Command {
           description: "A players in-game name",
           required: false,
         },
+        {
+          name: "profile",
+          type: "STRING",
+          description: "The player's profile. eg: Banana",
+          required: false,
+        },
       ],
       cooldown: 60000,
       ratelimit: 2,
@@ -58,7 +66,7 @@ export default class PlayerCommand extends Command {
 
   /**
    * @param {Message | AkairoMessage} message
-   * @param {{ign:string}} args
+   * @param {{ign:string;profile:string}} args
    */
 
   async exec(message, args) {
@@ -144,11 +152,6 @@ export default class PlayerCommand extends Command {
           { ttl: 60 }
         );
 
-        const senitherreq = await cachios.get(
-          `https://hypixel-api.senither.com/v1/profiles/${uuiddata.id}/last_save_at?key=${process.env.apiKey}`,
-          { ttl: 60 }
-        );
-
         const friendsdata = friendsreq.data;
 
         const playerreq = await cachios.get(
@@ -159,37 +162,21 @@ export default class PlayerCommand extends Command {
           { ttl: 60 }
         );
 
-        const activeProfile = getActiveProfile(
-          profiles.data.profiles,
-          uuiddata.id
-        );
+        let activeProfile;
+
+        if (args.profile) {
+          activeProfile = getProfile(profiles.data.profiles, args.profile);
+        } else {
+          activeProfile = getActiveProfile(profiles.data.profiles, uuiddata.id);
+        }
 
         const profile = activeProfile.members[uuiddata.id];
 
-        let response;
-
         profile.banking = activeProfile.banking;
-
-        try {
-          response = await cachios.post(
-            `https://maro.skybrokers.xyz/api/networth/categories`,
-            { data: profile },
-            { ttl: 60 }
-          );
-        } catch (e) {
-          console.error(e);
-        }
-
-        const res = response.data.data;
 
         const playerdata = playerreq.data;
 
         const time = splitTime(profile.last_save);
-
-        const emojis = await cachios.get(
-          "https://raw.githubusercontent.com/Altpapier/Skyblock-Item-Emojis/main/emojis.json",
-          { ttl: 60000 }
-        );
 
         const embed = new MessageEmbed().setDescription(
           `${uuiddata.name} last played <t:${time}:R>. ${uuiddata.name} has **${friendsdata.records.length}** friends.`
@@ -209,11 +196,6 @@ export default class PlayerCommand extends Command {
         this.embeds = [embed, embed2, embed3];
 
         this.buttons = [button1, button2];
-
-        const sa = Humanize.formatNumber(
-          senitherreq.data.data.skills.average_skills,
-          2
-        );
 
         for (let i = 0; i < ObjectLength(this.embeds); i++) {
           if (playerdata.player.rank) {
@@ -236,6 +218,16 @@ export default class PlayerCommand extends Command {
           );
         }
 
+        const senitherreq = await cachios.get(
+          `https://hypixel-api.senither.com/v1/profiles/${uuiddata.id}/${activeProfile.cute_name}?key=${process.env.apiKey}`,
+          { ttl: 60 }
+        );
+
+        const sa = Humanize.formatNumber(
+          senitherreq.data.data.skills.average_skills,
+          2
+        );
+
         try {
           embed.addField(
             `Senither Weight:`,
@@ -246,10 +238,6 @@ export default class PlayerCommand extends Command {
             )
           );
           embed.addField(`Skill Average:`, sa);
-          embed.addField(
-            `Networth:`,
-            "$" + Humanize.formatNumber(res.networth + res.bank + res.purse, 2)
-          );
         } catch (e) {
           console.error(e);
         }
@@ -352,9 +340,9 @@ export default class PlayerCommand extends Command {
               )} weight)_ : `,
               value:
                 `**Revenant** _(${Humanize.formatNumber(
-                  senitherreq.data.data.slayers.bosses.revenant.weight +
-                    senitherreq.data.data.slayers.bosses.revenant
-                      .weight_overflow,
+                  (senitherreq.data.data.slayers.bosses.revenant.weight ?? 0) +
+                    (senitherreq.data.data.slayers.bosses.revenant
+                      .weight_overflow ?? 0),
                   2
                 )} weight)_ → Experience ${Humanize.compactInteger(
                   senitherreq.data.data.slayers.bosses.revenant.experience,
@@ -365,9 +353,9 @@ export default class PlayerCommand extends Command {
                 )})_` +
                 "\n" +
                 `**Tarantula** _(${Humanize.formatNumber(
-                  senitherreq.data.data.slayers.bosses.tarantula.weight +
-                    senitherreq.data.data.slayers.bosses.tarantula
-                      .weight_overflow,
+                  (senitherreq.data.data.slayers.bosses.tarantula.weight ?? 0) +
+                    (senitherreq.data.data.slayers.bosses.tarantula
+                      .weight_overflow ?? 0),
                   2
                 )} weight)_ → Experience ${Humanize.compactInteger(
                   senitherreq.data.data.slayers.bosses.tarantula.experience,
@@ -378,8 +366,9 @@ export default class PlayerCommand extends Command {
                 )})_` +
                 "\n" +
                 `**Sven** _(${Humanize.formatNumber(
-                  senitherreq.data.data.slayers.bosses.sven.weight +
-                    senitherreq.data.data.slayers.bosses.sven.weight_overflow,
+                  (senitherreq.data.data.slayers.bosses.sven.weight ?? 0) +
+                    (senitherreq.data.data.slayers.bosses.sven
+                      .weight_overflow ?? 0),
                   2
                 )} weight)_ → Experience ${Humanize.compactInteger(
                   senitherreq.data.data.slayers.bosses.sven.experience,
@@ -390,9 +379,9 @@ export default class PlayerCommand extends Command {
                 )})_` +
                 "\n" +
                 `**Enderman** _(${Humanize.formatNumber(
-                  senitherreq.data.data.slayers.bosses.enderman.weight +
-                    senitherreq.data.data.slayers.bosses.enderman
-                      .weight_overflow,
+                  (senitherreq.data.data.slayers.bosses.enderman.weight ?? 0) +
+                    (senitherreq.data.data.slayers.bosses.enderman
+                      .weight_overflow ?? 0),
                   2
                 )} weight)_ → Experience ${Humanize.compactInteger(
                   senitherreq.data.data.slayers.bosses.enderman.experience,
@@ -406,84 +395,92 @@ export default class PlayerCommand extends Command {
             {
               name: `
 <:mort:923849004469616650> Dungeons Weight _(${Humanize.formatNumber(
-                senitherreq.data.data.dungeons.weight +
-                  senitherreq.data.data.dungeons.weight_overflow,
+                (senitherreq.data.data.dungeons?.weight ?? 0) +
+                  (senitherreq.data.data.dungeons?.weight.weight_overflow ?? 0),
                 2
               )} weight)_ : `,
               value:
                 `**Catacombs** _(${Humanize.formatNumber(
-                  senitherreq.data.data.dungeons.types.catacombs.weight +
-                    senitherreq.data.data.dungeons.types.catacombs
-                      .weight_overflow,
+                  (senitherreq.data.data.dungeons?.types.catacombs.weight ??
+                    0) +
+                    (senitherreq.data.data.dungeons?.types.catacombs
+                      .weight_overflow ?? 0),
                   2
                 )} weight)_ → Experience ${Humanize.compactInteger(
-                  senitherreq.data.data.dungeons.types.catacombs.experience,
+                  senitherreq.data.data.dungeons?.types.catacombs.experience ??
+                    0,
                   1
                 )} _(Level ${Humanize.formatNumber(
-                  senitherreq.data.data.dungeons.types.catacombs.level,
+                  senitherreq.data.data.dungeons?.types.catacombs.level ?? 0,
                   2
                 )})_` +
                 "\n" +
                 `**Healer** _(${Humanize.formatNumber(
-                  senitherreq.data.data.dungeons.classes.healer.weight +
-                    senitherreq.data.data.dungeons.classes.healer
-                      .weight_overflow,
+                  (senitherreq.data.data.dungeons?.classes.healer.weight ?? 0) +
+                    (senitherreq.data.data.dungeons?.classes.healer
+                      .weight_overflow ?? 0),
                   2
                 )} weight)_ → Experience ${Humanize.compactInteger(
-                  senitherreq.data.data.dungeons.classes.healer.experience,
+                  senitherreq.data.data.dungeons?.classes.healer.experience ??
+                    0,
                   1
                 )} _(Level ${Humanize.formatNumber(
-                  senitherreq.data.data.dungeons.classes.healer.level,
+                  senitherreq.data.data.dungeons?.classes.healer.level ?? 0,
                   2
                 )})_` +
                 "\n" +
                 `**Mage** _(${Humanize.formatNumber(
-                  senitherreq.data.data.dungeons.classes.mage.weight +
-                    senitherreq.data.data.dungeons.classes.mage.weight_overflow,
+                  (senitherreq.data.data.dungeons?.classes.mage.weight ?? 0) +
+                    (senitherreq.data.data.dungeons?.classes.mage
+                      .weight_overflow ?? 0),
                   2
                 )} weight)_ → Experience ${Humanize.compactInteger(
-                  senitherreq.data.data.dungeons.classes.mage.experience,
+                  senitherreq.data.data.dungeons?.classes.mage.experience ?? 0,
                   1
                 )} _(Level ${Humanize.formatNumber(
-                  senitherreq.data.data.dungeons.classes.mage.level,
+                  senitherreq.data.data.dungeons?.classes.mage.level ?? 0,
                   2
                 )})_` +
                 "\n" +
                 `**Berserker** _(${Humanize.formatNumber(
-                  senitherreq.data.data.dungeons.classes.berserker.weight +
-                    senitherreq.data.data.dungeons.classes.berserker
-                      .weight_overflow,
+                  (senitherreq.data.data.dungeons?.classes.berserker.weight ??
+                    0) +
+                    (senitherreq.data.data.dungeons?.classes.berserker
+                      .weight_overflow ?? 0),
                   2
                 )} weight)_ → Experience ${Humanize.compactInteger(
-                  senitherreq.data.data.dungeons.classes.berserker.experience,
+                  senitherreq.data.data.dungeons?.classes.berserker
+                    .experience ?? 0,
                   1
                 )} _(Level ${Humanize.formatNumber(
-                  senitherreq.data.data.dungeons.classes.berserker.level,
+                  senitherreq.data.data.dungeons?.classes.berserker.level ?? 0,
                   2
                 )})_` +
                 "\n" +
                 `**Archer** _(${Humanize.formatNumber(
-                  senitherreq.data.data.dungeons.classes.archer.weight +
-                    senitherreq.data.data.dungeons.classes.archer
-                      .weight_overflow,
+                  (senitherreq.data.data.dungeons?.classes.archer.weight ?? 0) +
+                    (senitherreq.data.data.dungeons?.classes.archer
+                      .weight_overflow ?? 0),
                   2
                 )} weight)_ → Experience ${Humanize.compactInteger(
-                  senitherreq.data.data.dungeons.classes.archer.experience,
+                  senitherreq.data.data.dungeons?.classes.archer.experience ??
+                    0,
                   1
                 )} _(Level ${Humanize.formatNumber(
-                  senitherreq.data.data.dungeons.classes.archer.level,
+                  senitherreq.data.data.dungeons?.classes.archer.level ?? 0,
                   2
                 )})_` +
                 "\n" +
                 `**Tank** _(${Humanize.formatNumber(
-                  senitherreq.data.data.dungeons.classes.tank.weight +
-                    senitherreq.data.data.dungeons.classes.tank.weight_overflow,
+                  (senitherreq.data.data.dungeons?.classes.tank.weight ?? 0) +
+                    (senitherreq.data.data.dungeons?.classes.tank
+                      .weight_overflow ?? 0),
                   2
                 )} weight)_ → Experience ${Humanize.compactInteger(
-                  senitherreq.data.data.dungeons.classes.tank.experience,
+                  senitherreq.data.data.dungeons?.classes.tank.experience ?? 0,
                   1
                 )} _(Level ${Humanize.formatNumber(
-                  senitherreq.data.data.dungeons.classes.tank.level,
+                  senitherreq.data.data.dungeons?.classes.tank.level ?? 0,
                   2
                 )})_`,
             }
@@ -495,299 +492,28 @@ export default class PlayerCommand extends Command {
               2
             )}** weight.`
           );
-
-        embed3
-          .addFields(
-            {
-              name: "<:item_289:901956838864588810> Purse:",
-              value: Humanize.compactInteger(res.purse, 2),
-              inline: true,
-            },
-            {
-              name: "<:item_266:901949082745069629> Bank",
-              value: Humanize.compactInteger(res.bank, 2),
-              inline: true,
-            }
-          )
-          .setDescription(
-            `${uuiddata.name}'s Total Networth is **$${Humanize.formatNumber(
-              res.networth + res.bank + res.purse,
-              2
-            )}**`
+        if (args.profile) {
+          await generateNetworthEmbed(
+            uuiddata.id,
+            embed3,
+            uuiddata.name,
+            embed,
+            args.profile
           );
-
-        if (res.sacks) {
-          embed3.addField(
-            "<:Sack_Of_Sacks:936101156290191421> Sacks",
-            Humanize.compactInteger(res.sacks, 2),
-            true
+        } else {
+          await generateNetworthEmbed(
+            uuiddata.id,
+            embed3,
+            uuiddata.name,
+            embed
           );
         }
 
-        const inventories = {
-          armor: "<:tank:924858459428618342> Armour",
-          wardrobe_inventory: "<:item_2875:902830721897472010> Wardrobe",
-          inventory: "<:item_1515:902370580647534633> Inventory",
-          enderchest: "<:item_447:902010140163711067> Ender Chest",
-          storage: "<:item_1449:902348308687777822> Storage",
-          pets: "<:item_3796:903200953082200065> Pets",
-          talismans: "<:item_1877:902492754804899840> Accessories",
-        };
-
-        let armorText = "";
-        let wardrobe_inventoryText = "";
-        let inventoryText = "";
-        let enderchestText = "";
-        let storageText = "";
-        let petsText = "";
-        let talismansText = "";
-
-        let repeatArmor;
-        let repeatWardrobe_inventory;
-        let repeatInventory;
-        let repeatEnderchest;
-        let repeatStorage;
-        let repeatPets;
-        let repeatTalismans;
-
-        if (res.categories.armor.total > 0) {
-          const categoryArmor = res.categories.armor;
-          if (4 < categoryArmor.top_items.length + 1) {
-            repeatArmor = 4;
-          } else if (4 > categoryArmor.top_items.length + 1) {
-            repeatArmor = categoryArmor.top_items.length;
-          }
-          for (let i = 0; i < repeatArmor; i++) {
-            if (categoryArmor.top_items[i].count > 1) {
-              armorText += `${categoryArmor.top_items[i].count}x `;
-            }
-            if (categoryArmor.top_items[i].name) {
-              armorText += categoryArmor.top_items[i].name;
-            }
-            if (categoryArmor.top_items[i].recomb) {
-              armorText += " <:recomb:920527647400919060>";
-            }
-            if (categoryArmor.top_items[i].price) {
-              armorText += ` *(${Humanize.compactInteger(
-                categoryArmor.top_items[i].price,
-                2
-              )})*`;
-            }
-            armorText += "\n";
-          }
-        } else {
-          armorText += "No Items tf";
-        }
-
-        if (res.categories.wardrobe_inventory.total > 0) {
-          const categoryWardrobe_inventory = res.categories.wardrobe_inventory;
-          if (4 < categoryWardrobe_inventory.top_items.length) {
-            repeatWardrobe_inventory = 4;
-          } else if (4 > categoryWardrobe_inventory.top_items.length) {
-            repeatWardrobe_inventory =
-              categoryWardrobe_inventory.top_items.length;
-          }
-          for (let i = 0; i < repeatWardrobe_inventory; i++) {
-            if (categoryWardrobe_inventory.top_items[i].count > 1) {
-              wardrobe_inventoryText += `${categoryWardrobe_inventory.top_items[i]["count"]}x `;
-            }
-            if (categoryWardrobe_inventory.top_items[i].name) {
-              wardrobe_inventoryText +=
-                categoryWardrobe_inventory.top_items[i].name;
-            }
-            if (categoryWardrobe_inventory.top_items[i].recomb) {
-              wardrobe_inventoryText += " <:recomb:920527647400919060>";
-            }
-            if (categoryWardrobe_inventory.top_items[i].price) {
-              wardrobe_inventoryText += ` *(${Humanize.compactInteger(
-                categoryWardrobe_inventory.top_items[i].price,
-                2
-              )})*`;
-            }
-            wardrobe_inventoryText += "\n";
-          }
-        } else {
-          wardrobe_inventoryText += "No Items tf";
-        }
-
-        if (res.categories.inventory.total > 0) {
-          const categoryInventory = res.categories.inventory;
-          if (4 < categoryInventory.top_items.length) {
-            repeatInventory = 4;
-          } else if (4 > categoryInventory.top_items.length) {
-            repeatInventory = categoryInventory.top_items.length;
-          }
-          for (let i = 0; i < repeatInventory; i++) {
-            if (categoryInventory.top_items[i].count > 1) {
-              inventoryText += `${categoryInventory.top_items[i]["count"]}x `;
-            }
-            if (categoryInventory.top_items[i].name) {
-              inventoryText += categoryInventory.top_items[i].name;
-            }
-            if (categoryInventory.top_items[i].recomb) {
-              inventoryText += " <:recomb:920527647400919060>";
-            }
-            if (categoryInventory.top_items[i].price) {
-              inventoryText += ` *(${Humanize.compactInteger(
-                categoryInventory.top_items[i].price,
-                2
-              )})*`;
-            }
-            inventoryText += "\n";
-          }
-        } else {
-          inventoryText += "No Items tf";
-        }
-
-        if (res.categories.enderchest.total > 0) {
-          const categoryEnderChest = res.categories.enderchest;
-          if (4 < categoryEnderChest.top_items.length) {
-            repeatEnderchest = 4;
-          } else if (4 > categoryEnderChest.top_items.length) {
-            repeatEnderchest = categoryEnderChest.top_items.length;
-          }
-          for (let i = 0; i < repeatEnderchest; i++) {
-            if (categoryEnderChest.top_items[i].count > 1) {
-              enderchestText += `${categoryEnderChest.top_items[i].count}x `;
-            }
-            if (categoryEnderChest.top_items[i].name) {
-              enderchestText += categoryEnderChest.top_items[i].name;
-            }
-            if (categoryEnderChest.top_items[i].recomb) {
-              enderchestText += " <:recomb:920527647400919060>";
-            }
-            if (categoryEnderChest.top_items[i].price) {
-              enderchestText += ` *(${Humanize.compactInteger(
-                categoryEnderChest.top_items[i].price,
-                2
-              )})*`;
-            }
-            enderchestText += "\n";
-          }
-        } else {
-          enderchestText += "No Items tf";
-        }
-
-        if (res.categories.storage.total > 0) {
-          const categoryStorage = res.categories.storage;
-          if (4 < categoryStorage.top_items.length) {
-            repeatStorage = 4;
-          } else if (4 > categoryStorage.top_items.length) {
-            repeatStorage = categoryStorage.top_items.length;
-          }
-          for (let i = 0; i < repeatStorage; i++) {
-            if (categoryStorage.top_items[i].count > 1) {
-              storageText += `${categoryStorage.top_items[i]["count"]}x `;
-            }
-            if (categoryStorage.top_items[i].name) {
-              storageText += categoryStorage.top_items[i].name;
-            }
-            if (categoryStorage.top_items[i].recomb) {
-              storageText += " <:recomb:920527647400919060>";
-            }
-            if (categoryStorage.top_items[i].price) {
-              storageText += ` *(${Humanize.compactInteger(
-                categoryStorage.top_items[i].price,
-                2
-              )})*`;
-            }
-            storageText += "\n";
-          }
-        } else {
-          storageText += "No Items tf";
-        }
-
-        if (res.categories.pets.total > 0) {
-          const categoryPets = res.categories.pets;
-          if (4 < categoryPets.top_items.length) {
-            repeatPets = 4;
-          } else if (4 > categoryPets.top_items.length) {
-            repeatPets = categoryPets.top_items.length;
-          }
-          for (let i = 0; i < repeatPets; i++) {
-            if (categoryPets.top_items[i].count > 1) {
-              petsText += `${categoryPets.top_items[i]["count"]}x `;
-            }
-            if (categoryPets.top_items[i].name) {
-              petsText += categoryPets.top_items[i].name;
-            }
-            if (categoryPets.top_items[i].heldItem) {
-              petsText += ` ${
-                emojis.data[categoryPets.top_items[i].heldItem].formatted
-              }`;
-            }
-            if (categoryPets.top_items[i].price) {
-              petsText += ` *(${Humanize.compactInteger(
-                categoryPets.top_items[i].price,
-                2
-              )})*`;
-            }
-            petsText += "\n";
-          }
-        } else {
-          petsText += "No Items tf";
-        }
-
-        if (res.categories.talismans.total > 0) {
-          const categoryTalismans = res.categories.talismans;
-          if (4 < categoryTalismans.top_items.length) {
-            repeatTalismans = 4;
-          } else if (4 > categoryTalismans.top_items.length) {
-            repeatTalismans = categoryTalismans.top_items.length;
-          }
-          for (let i = 0; i < repeatTalismans; i++) {
-            if (categoryTalismans.top_items[i].count > 1) {
-              talismansText += `${categoryTalismans.top_items[i]["count"]}x `;
-            }
-            if (categoryTalismans.top_items[i].name) {
-              talismansText += categoryTalismans.top_items[i].name;
-            }
-            if (categoryTalismans.top_items[i].recomb) {
-              talismansText += " <:recomb:920527647400919060>";
-            }
-            if (categoryTalismans.top_items[i].price) {
-              talismansText += ` *(${Humanize.compactInteger(
-                categoryTalismans.top_items[i].price,
-                2
-              )})*`;
-            }
-            talismansText += "\n";
-          }
-        } else {
-          talismansText += "No Items tf";
-        }
-
-        const texts = {
-          armor: armorText,
-          wardrobe_inventory: wardrobe_inventoryText,
-          inventory: inventoryText,
-          enderchest: enderchestText,
-          storage: storageText,
-          pets: petsText,
-          talismans: talismansText,
-        };
-        let txt;
-        for (let item in inventories) {
-          if (res.categories[item]) {
-            const req = res.categories[item];
-            if (req) {
-              txt = Humanize.compactInteger(req.total, 2);
-            } else if (!req) {
-              txt = "$0";
-            }
-            embed3.addField(
-              inventories[item] + ` *($${txt})*`,
-              `${texts[item]}`
-            );
-          }
-        }
         return await pagination(msg, this.embeds, this.buttons, 30000);
       }
     } catch (e) {
       console.error(e);
-      await message.util.reply(
-        "<:error:923018104303415326>This command failed, probably because this player has their API off."
-      );
+      await message.util.reply(`\```${e}\````);
     }
   }
 }

@@ -1,9 +1,11 @@
 import { AkairoMessage, Command, Listener } from "discord-akairo";
-import { Channel, Message, WebhookClient } from "discord.js";
+import { Channel, Message, MessageEmbed, WebhookClient } from "discord.js";
+import { google } from "googleapis";
 import MessageExp from "../structures/models/MessageExp.js";
 import Prefix from "../structures/models/Prefix.js";
 import { mc } from "../index.js";
 import wait from "wait";
+import GuildSetting from "../structures/models/GuildSettings.js";
 
 export default class messageSendListener extends Listener {
   constructor() {
@@ -66,6 +68,7 @@ export default class messageSendListener extends Listener {
             });
         }
       }
+
       if (message.content.startsWith("ez") || message.content.includes(" ez")) {
         let ezMessages = [
           "Wait... This isn't what I typed!",
@@ -115,8 +118,8 @@ export default class messageSendListener extends Listener {
           }
         );
         const webhookclient = new WebhookClient({ id: wb.id, token: wb.token });
-        webhookclient.send(ezMessages[randomNumber]);
-        message.delete();
+        await webhookclient.send(ezMessages[randomNumber]);
+        await message.delete();
       }
     }
     if (
@@ -124,7 +127,40 @@ export default class messageSendListener extends Listener {
       !message.author.bot &&
       message.content !== "ez"
     ) {
-      mc.chat("/gc " + `[${message.author.username}]: ${message.content}`);
-    } else return;
+      if (
+        message.type === "REPLY" &&
+        message.mentions.repliedUser.bot !== true
+      ) {
+        const user = message.mentions.repliedUser.username;
+        return mc.chat(
+          "/gc " +
+            `[${message.author.username} replying to ${user}] > ${message.content}`
+        );
+      } else if (
+        message.type === "REPLY" &&
+        message.mentions.repliedUser.bot === true
+      ) {
+        message.fetchReference().then((msg) => {
+          mc.chat(
+            "/gc " +
+              `[${message.author.username} replying to ${msg.embeds[0].title}] > ${message.content}`
+          );
+        });
+      } else {
+        return mc.chat(
+          "/gc " + `[${message.author.username}] > ${message.content}`
+        );
+      }
+    } else if (
+      message.channel.id === "833607988798816279" &&
+      message.type === "REPLY" &&
+      !message.author.bot
+    ) {
+      message.fetchReference().then((msg) => {
+        console.log(msg.embeds[0]);
+      });
+    } else {
+      return;
+    }
   }
 }
