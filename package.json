@@ -11,6 +11,7 @@
   },
   "author": "Strqtz",
   "license": "ISC",
+  "GOOD_MORNING": "Riceblades11",
   "engines": {
     "node": "16.6.0"
   },
