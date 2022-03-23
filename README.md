@@ -1,6 +1,6 @@
 # Strqtz's Bot
 Strqtz's Bot is a multifunctional discord and minecraft bot.
-For my Hypixel Guild StopThrowing, and my server Gamer Lounge.
+For my Hypixel Guild StopThrowing, and All my Discord Servers
 
 ## Time Spent on Development
 
@@ -10,16 +10,13 @@ For my Hypixel Guild StopThrowing, and my server Gamer Lounge.
 * Discord Chat to Guild Chat Bridge.
 * Frag Bot
 * Fun commands such as chucknorris jokes, and insults.
+* Networth Calculation found [here](https://github.com/Strqtz/SB-API)
 
 ### Planned Features
 * Giveaways
-* Maro Networth API
 * Auto Skill Average and Catacombs level roles
 * Guild Chat commands
 * Moderation and Auto-Moderation
-* Meme commands and more fun commands
 * Alchemy Calculator
-* Advanced Catacombs Level Calculator
 * Reaction Roles
 * Custom Guild Application eg. weight, cata, nw, sa requirement.
-
