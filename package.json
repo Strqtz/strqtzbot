@@ -16,7 +16,7 @@
     "node": "16.6.0"
   },
   "dependencies": {
-    "axios": "^0.23.0",
+    "axios": "^0.24.0",
     "cachios": "^3.1.1",
     "canvas": "^2.9.0",
     "chalk": "^4.1.2",
